@@ -1,0 +1,64 @@
+* {
+    font-family: "SUITE Variable";
+    margin: 0;
+    padding: 0;
+}
+
+.main-container {
+    width: 100%;
+    height: 300vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #131620;
+}
+
+.tomodalopen {
+    position: fixed;
+    top: 37%; /* 버튼의 상단 위치 */
+    left: 0; /* 버튼을 왼쪽에 고정 */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    background-color: #0E0d10;
+    color: white;
+    height: 300px;
+    text-align: center;
+    z-index: 1000; /* 버튼을 다른 요소들 위에 위치시킴 */
+}
+
+.navigate-container {
+    position: fixed;
+    top: 8%;
+    left: 0;
+    width: 300px; /* 네비게이션 바의 너비 */
+    height: 100%;
+    display: flex;
+    justify-content: flex-start; /* 왼쪽에 고정 */
+    align-items: flex-start; /* 위쪽에 고정 */
+    z-index: 1001; /* 네비게이션 바를 다른 요소들 위에 위치시킴 */
+}
+
+.tomodal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000; /* 반투명 배경을 다른 요소들 위에 위치시킴 */
+}
+.main-box{
+    width: 90%;
+    height: 35vh;
+    background:linear-gradient(0.25turn,#7961A8, #233354);
+    margin-top: 60px;
+}
+.main-header-container{
+    display: flex;
+    flex-direction: row;
+}
+.main-bar{
+    margin:30px;
+}

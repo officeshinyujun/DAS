@@ -1,0 +1,173 @@
+.profile-container{
+    position: relative;
+    width: 100%;
+    gap: 30px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    background-color: #131620;
+    padding: 20px;
+
+}
+.profile-content{
+    width: 400px;
+    height: 90%;
+    border-radius: 7px;
+    border:1px solid #3C3C3C;
+    box-sizing: border-box;
+
+}
+.profile-content2{
+    width: calc(90% - 400px);
+    height: 90vh;
+    border-radius: 7px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+
+}
+.profile-content-main{
+    background-color: #171A29;
+    color: white;
+    gap: 20px;
+    width: 100%;
+    height: calc(95vh - 200px);
+    display: flex;
+    justify-content: center;
+    flex-direction: column;align-items: center;
+}
+.profile-content-main-2{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #131620;
+    width: 90%;
+    border :1px solid #000;
+    border-radius: 10px;
+}
+.profile-content-main-standing-detail>p:nth-child(1){
+    color: #717171;
+    font-size: 10px;
+}
+.profile-content-main-standing-detail>p:nth-child(2){
+    color: #7961A8;
+    font-size: 20px;
+}
+.profile-content-main-standing{
+    padding: 5px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 10px;
+    border: 1px solid #000;
+    border-radius: 10px;
+}
+.profile-content-main-badges{
+    display: flex;
+    width: calc(90% - 20px);
+    flex-direction: row;
+    gap: 10px;
+    justify-content: flex-start;
+    margin-bottom: 10px;
+}
+.profile-content-main-3{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: start;
+    background-color: #131620;
+    width: 90%;
+    box-sizing: border-box;
+    padding: 10px 20px;
+    border :1px solid #000;
+    border-radius: 10px;
+}
+.profile-content-main-4{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #131620;
+    width: 90%;
+    box-sizing: border-box;
+    padding: 10px 20px;
+    border :1px solid #000;
+    border-radius: 10px ;
+}
+.profile-content-main-4-gamecon{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+}
+
+.profile-content2-40lines{
+    width: 90%;
+    height: calc(100% / 3);
+    border:1px solid #000;
+    color: white;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+}
+.profile-content2-40lines-head{
+    display: flex;
+    width: 250px;
+    position: sticky;
+    gap: 10px;
+    align-items: center;
+}
+.profile-content2-40lines-box{
+    background-image: url("../design/Rectangle 50.png");
+    display: flex;
+    align-items: center;
+    width: 160px;
+    height: 40px;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+.profile-content2-40lines-records{
+    width: 100%;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
+}
+.profile-content2-40lines-standing{
+    width: 150px;
+    height: 40px;
+    border: 1px solid red;
+}
+.profile-content2-40lines-more{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    background-color: #131620;
+    box-sizing: border-box;
+    height: 100px;
+    width:  100%;
+    padding: 20px;
+    z-index: 10;
+    border:1px solid red;
+}
+.profile-content2-40lines-more2{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    background-color: #131620;
+    box-sizing: border-box;
+    height: 300px;
+    width:  100%;
+    padding: 20px;
+    z-index: 10;
+    border:1px solid red;
+}

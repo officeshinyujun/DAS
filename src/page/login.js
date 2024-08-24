@@ -11,15 +11,6 @@ function LoginPage() {
     const auth = getAuth(app);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        // 로그인 상태 확인 및 유저 설정
-        const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-            if (currentUser) {
-                navigate('/');
-            }
-        });
-        return () => unsubscribe();
-    }, [auth, navigate]);
 
     const emailChange = (e) => {
         setEmail(e.target.value);

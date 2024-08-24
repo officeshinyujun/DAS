@@ -34,7 +34,7 @@ function NavigateLeft({ modalclose }) {
     const fetchData = async () => {
         if (profileId) {
             try {
-                const res = await fetch(`https://ch.tetr.io/api/users/${profileId}`);
+                const res = await fetch(`http://127.0.0.1:8000/users/${profileId}`);
                 const json = await res.json();
                 setProfile(json);
             } catch (error) {

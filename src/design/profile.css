@@ -1,6 +1,5 @@
 .profile-container{
     position: relative;
-    width: 100%;
     gap: 30px;
     display: flex;
     flex-direction: row;
@@ -16,17 +15,16 @@
     border-radius: 7px;
     border:1px solid #3C3C3C;
     box-sizing: border-box;
-
 }
 .profile-content2{
     width: calc(90% - 400px);
-    height: 90vh;
     border-radius: 7px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 15px;
+    gap: 30px;
+    padding: 30px;
 
 }
 .profile-content-main{
@@ -50,7 +48,7 @@
     border-radius: 10px;
 }
 .profile-content-main-standing-detail>p:nth-child(1){
-    color: #717171;
+    color: #888888;
     font-size: 10px;
 }
 .profile-content-main-standing-detail>p:nth-child(2){
@@ -108,7 +106,18 @@
 
 .profile-content2-40lines{
     width: 90%;
-    height: calc(100% / 3);
+    height: 300px;
+    border:1px solid #000;
+    color: white;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+}
+.profile-content2-zen{
+    width: 90%;
+    height: 200px;
     border:1px solid #000;
     color: white;
     padding: 0;
@@ -133,6 +142,40 @@
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
+    padding-left: 20px;
+}
+.profile-content2-blitz-box{
+    background-image: url("../design/rectangle blitz.png");
+    display: flex;
+    align-items: center;
+    width: 160px;
+    height: 40px;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    padding-left: 20px;
+}
+.profile-content2-zen-box{
+    background-image: url("../design/rectangle zen.png");
+    display: flex;
+    align-items: center;
+    width: 160px;
+    height: 40px;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    padding-left: 20px;
+}
+.profile-content2-quick-box{
+    background-image: url("../design/asdasdasdf.png");
+    display: flex;
+    align-items: center;
+    width: 380px;
+    height: 40px;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    padding-left: 20px;
 }
 .profile-content2-40lines-records{
     width: 100%;
@@ -161,13 +204,17 @@
 }
 .profile-content2-40lines-more2{
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: space-between;
-    background-color: #131620;
-    box-sizing: border-box;
-    height: 300px;
-    width:  100%;
+    align-items: center;
     padding: 20px;
-    z-index: 10;
-    border:1px solid red;
+    border-top: #717171;
+    height: 60px;
+    color: #717171;
+}
+.profile-content2-quick-head{
+    width: 600px;
+    display: flex;
+    align-items: center;
+
 }

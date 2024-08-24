@@ -2,6 +2,7 @@ import Header from "../component/header";
 import { useEffect, useState } from "react";
 import base64 from "base-64";
 import "../design/profile.css";
+import date from "date-and-time";
 
 function Profile() {
     const [userProfileData, setUserProfileData] = useState(null);
@@ -9,7 +10,7 @@ function Profile() {
     const [bannerImage, setBannerimage] = useState('');
     const [profileImage, setProfileImage] = useState('');
     const [userReacordData, setUserReacordData] = useState(null);
-    const [useDecode, setUseDecode] = useState(null);
+    const [userDecodeName, setUserDecodeName] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [dataLoaded, setDataLoaded] = useState(false);
     const [lineView, setLineView] = useState(false);
@@ -23,46 +24,63 @@ function Profile() {
         "https://tetr.io/res/badges/twc23_t8.png"
     ];
 
-    useEffect(() => {
+    const date = require('date-and-time')
+
+    const decodeToken = () => {
         const token = localStorage.getItem('authToken');
         if (!token) {
             console.error("Token not found in localStorage.");
-            return;
+            return null;
         }
 
         try {
             const payload = token.substring(token.indexOf('.') + 1, token.lastIndexOf('.'));
             const decode = base64.decode(payload);
-            const decodedData = JSON.parse(decode);
-            setUseDecode(decodedData);
+            return JSON.parse(decode);
         } catch (err) {
             console.error("Error decoding or parsing token:", err);
+            return null;
+        }
+    };
+
+    useEffect(() => {
+        const decodedData = decodeToken();
+        if (decodedData) {
+            setUserDecodeName(decodedData);
+            loadData(decodedData);
         }
     }, []);
 
-    useEffect(() => {
-        if (useDecode) {
-            loadData();
-        }
-    }, [useDecode]);
+    const forthynow =()=>{
+        const now = new Date();
+        const futureDate = new Date(userReacordData["40l"].data.ts);
+        const forthydiff = date.subtract(futureDate, now);
+        return forthydiff
+    }
 
-    const loadData = async () => {
+    const blitznow =()=>{
+        const now = new Date();
+        const futureDate = new Date(userReacordData["blitz"].data.ts);
+        const blitzdiff = date.subtract(futureDate, now);
+        return blitzdiff
+    }
+
+    const loadData = async (decodedData) => {
+        if (!decodedData) return;
+
+        console.log(decodedData);
         setIsLoading(true);
 
-        if (!useDecode || !useDecode.name) {
-            setIsLoading(false);
-            return;
-        }
-
         try {
-            const userResponse = await fetch(`http://127.0.0.1:8000/users/${useDecode.name}`);
+            const userResponse = await fetch(`http://127.0.0.1:8000/users/${decodedData.name}`);
             if (!userResponse.ok) {
                 throw new Error("Failed to fetch user data.");
             }
             const userData = await userResponse.json();
+            console.log(userData)
             setUserProfileData(userData);
 
-            const recordResponse = await fetch(`http://127.0.0.1:8000/users/${useDecode.name}/summaries`);
+            const recordResponse = await fetch(`http://127.0.0.1:8000/users/${decodedData.name}/summaries`);
             if (!recordResponse.ok) {
                 throw new Error("Failed to fetch record data.");
             }
@@ -90,194 +108,299 @@ function Profile() {
         }
     };
 
-    const LinesDropDown =() =>{
-        return(
-            <div className="profile-content2-40lines-more2">
-                <ul style={{listStyleType: 'none'}}>
-                    <li>11</li>
-                    <li>12</li>
-                    <li>13</li>
-                </ul>
-                <ul style={{listStyleType: 'none'}}>
-                    <li>21</li>
-                    <li>22</li>
-                    <li>23</li>
-                </ul>
-                <ul style={{listStyleType: 'none'}}>
-                    <li>21</li>
-                    <li>22</li>
-                    <li>23</li>
-                </ul>
-            </div>
-        )
-    }
-
-    if (isLoading) {
-        return <div>Loading...</div>;
-    }
-
-    if (!dataLoaded || !userProfileData) {
-
-    }
-
     return (
         <>
             <Header/>
-
             <div className="profile-container">
-                <div className="profile-content">
-                    <img src={bannerImage} style={{width: '100%', height: '200px', objectFit: 'cover', display: "block"}} alt="Banner"/>
-                    <div className="profile-content-main">
-                        <img src={profileImage} style={{width: '200px', height: '200px', objectFit: 'cover', position: 'absolute', top: "12vh"}} alt="Profile Image"/>
-                        <div style={{display: "flex", justifyContent: "space-between", alignItems: "center", gap:"20px"}}>
-                            <h1 style={{fontSize: "45px"}}>{userProfileData.data.username.toUpperCase()}</h1>
-                            <img src={userFlag} alt="User flag" style={{width:"45px"}}/>
-                        </div>
-                        <div className="profile-content-main-2">
-                            <div style={{display: "flex", justifyContent: "center", alignItems: "center", gap:"20px", padding:"10px"}}>
-                                <p style={{alignItems:"center", display:"flex", gap:"10px", fontSize:"30px"}}>RANK :<img src={"https://tetrio.team2xh.net/images/ranks/sp.png"} style={{height:"30px"}}/></p>
-                                <div className="profile-content-main-standing">
-                                    <div className="profile-content-main-standing-detail">
-                                        <p>GLOBAL</p>
-                                        <p>#1234</p>
+                {isLoading ? (
+                    <p>Loading...</p>
+                ) : dataLoaded && userProfileData ? (
+                    <>
+                        <div className="profile-content">
+                            <div className="profile-content-main">
+                                <img src={bannerImage}
+                                     style={{width: '100%', height: '200px', objectFit: 'cover', display: "block"}}
+                                     alt="Banner"/>
+                                <img src={profileImage} style={{
+                                    width: '200px',
+                                    height: '200px',
+                                    objectFit: 'cover',
+                                    position: 'absolute',
+                                    top: "12vh"
+                                }} alt="Profile Image"/>
+                                <div style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    gap: "20px"
+                                }}>
+                                    <h1 style={{fontSize: "45px"}}>{userProfileData.data.username.toUpperCase()}</h1>
+                                    {console.log(userProfileData.data.username.toUpperCase())}
+                                    <img src={userFlag} alt="User flag" style={{width: "45px"}}/>
+                                </div>
+                                <div className="profile-content-main-2">
+                                    <div style={{
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        gap: "20px",
+                                        padding: "10px"
+                                    }}>
+                                        <p style={{
+                                            alignItems: "center",
+                                            display: "flex",
+                                            gap: "10px",
+                                            fontSize: "30px"
+                                        }}>RANK :<img src={"https://tetrio.team2xh.net/images/ranks/sp.png"}
+                                                      //https://tetr.io/res/league-ranks/a.png <-여기서 이미지 얻어올수 잇음
+                                                      style={{height: "30px"}}/></p>
+                                        <div className="profile-content-main-standing">
+                                            <div className="profile-content-main-standing-detail">
+                                                <p>GLOBAL</p>
+                                                <p>#{userReacordData.data.league.standing}</p>
+                                            </div>
+                                            <div style={{border: "1px solid #717171"}}></div>
+                                            <div className="profile-content-main-standing-detail">
+                                                <p>LOCAL</p>
+                                                <p>#{userReacordData.data.league.standing_local}</p>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div style={{border:"1px solid #717171"}}></div>
-                                    <div className="profile-content-main-standing-detail">
-                                        <p>LOCAL</p>
-                                        <p>#1234</p>
+                                    <div className="profile-content-main-badges">
+                                        {list.map((item, index) => (
+                                            <div key={index}><img src={imageList[item - 1]} style={{width: "30px"}}/>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="profile-content-main-3">
+                                    <p>xp : {Math.floor(userProfileData.data.xp)}</p>
+                                    <p>time : {Math.floor(userProfileData.data.gametime)}</p>
+                                </div>
+                                <div className="profile-content-main-4">
+                                    <div className="profile-content-main-4-gamecon">
+                                        <h3 style={{marginBottom: "10px"}}>gameplayed
+                                            : {userProfileData.data.gamesplayed}</h3>
+                                        <div style={{
+                                            display: "flex",
+                                            flexdirection: "row",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
+                                            gap: "20px"
+                                        }}>
+                                            <div style={{
+                                                background: "#6780FF",
+                                                width: "100px",
+                                                padding: "5px",
+                                                display: "flex",
+                                                justifyContent: "center",
+                                                alignItems: "center"
+                                            }}><p>win : {userProfileData.data.gameswon}</p></div>
+                                            <div style={{
+                                                background: "#FF6767",
+                                                width: "100px",
+                                                padding: "5px",
+                                                display: "flex",
+                                                justifyContent: "center",
+                                                alignItems: "center"
+                                            }}><p>lose
+                                                : {(userProfileData.data.gamesplayed) - (userProfileData.data.gameswon)}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style={{width: "100%", marginTop: "10px", marginBottom: "10px"}}>
+                                        <table style={{
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
+                                            gap: "20px",
+                                            width: "100%"
+                                        }}>
+                                            <tbody>
+                                            <tr>
+                                                <td>apm : {userProfileData.data.apm}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>glicko : {userProfileData.data.glicko}</td>
+                                            </tr>
+                                            </tbody>
+                                            <tbody>
+                                            <tr>
+                                                <td>pps : {userProfileData.data.pps}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>rd : {userProfileData.data.rd}</td>
+                                            </tr>
+                                            </tbody>
+                                            <tbody>
+                                            <tr>
+                                                <td>vs : {userProfileData.data.vs}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>ㅤ</td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
-                            <div className="profile-content-main-badges">
-                                {list.map((item, index) => (
-                                    <div key={index}><img src={imageList[item-1]} style={{width:"30px"}}/></div>
-                                ))}
-                            </div>
                         </div>
-                        <div className="profile-content-main-3">
-                            <p>xp : {Math.floor(userProfileData.data.xp)}</p>
-                            <p>time : {Math.floor(userProfileData.data.gametime)}</p>
+                        <div className="profile-content2">
+                        <div className="profile-content2-40lines">
+                                <div className="profile-content2-40lines-head">
+                                    <div className="profile-content2-40lines-box"><h3>40L</h3></div>
+                                    <a style={{textDecoration: "none", color: "white"}}>Replay</a>
+                                </div>
+                                <div className="profile-content2-40lines-records">
+                                    <h1 style={{fontSize: "50px"}}>
+                                        {
+                                            parseInt(((userReacordData.data["40l"].record.results.stats.finaltime) / (1000 * 60)) % 60)
+                                        }
+                                        :
+                                        {
+                                            (((userReacordData.data["40l"].record.results.stats.finaltime) / 1000) % 60).toFixed(2)
+                                        }
+                                    </h1>
+                                    <div className="profile-content-main-standing">
+                                        <div className="profile-content-main-standing-detail">
+                                            <p>GLOBAL</p>
+                                            <p>#1234</p>
+                                        </div>
+                                        <div style={{border: "1px solid #717171"}}></div>
+                                        <div className="profile-content-main-standing-detail">
+                                            <p>LOCAL</p>
+                                            <p>#1234</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <h3 style={{width: "100%", padding: "15px", fontSize: "30px"}}>{forthynow()}</h3>
+                                <div style={{width: "100%", padding: "0px", boxSizing: "content-box"}}>
+                                    <div className="profile-content2-40lines-more2">
+                                        <div style={{border: "1px solid #3c3c3c", width: "100%"}}></div>
+                                        <div style={{display:"flex", alignItems:"center", justifyContent:"space-around", width:"100%", padding:"10px"}}>
+                                            <div>pps - {(userReacordData.data["40l"].record.results.aggregatestats.pps).toFixed(3)}</div>
+                                            <div>finesse - {userReacordData.data["40l"].record.results.stats.finesse.faults}F</div>
+                                            <div>pices - {userReacordData.data["40l"].record.results.stats.piecesplaced} pieces</div>
+                                        </div>
+                                    </div>
+                                </div>
                         </div>
-                        <div className="profile-content-main-4">
-                            <div className="profile-content-main-4-gamecon">
-                                <h3 style={{marginBottom:"10px"}}>gameplayed : {userProfileData.data.gamesplayed}</h3>
-                                <div style={{display:"flex", flexdirection:"row", justifyContent:"space-between", alignItems:"center", gap:"20px"}}>
-                                    <div style={{background:"#6780FF", width:"80px", padding:"5px", display:"flex", justifyContent:"center", alignItems:"center"}}><p>win : {userProfileData.data.gameswon}</p></div>
-                                    <div style={{background:"#FF6767", width:"80px", padding:"5px", display:"flex", justifyContent:"center", alignItems:"center"}}><p>lose : {(userProfileData.data.gamesplayed) - (userProfileData.data.gameswon)}</p></div>
+                            <div className="profile-content2-40lines">
+                                <div className="profile-content2-40lines-head">
+                                    <div className="profile-content2-blitz-box"><h3>BLITZ</h3></div>
+                                    <a style={{textDecoration: "none", color: "white"}}>Replay</a>
+                                </div>
+                                <div className="profile-content2-40lines-records">
+                                    <h1 style={{fontSize: "50px"}}>{userReacordData.data.blitz.record.results.stats.score}</h1>
+                                    <div className="profile-content-main-standing">
+                                        <div className="profile-content-main-standing-detail">
+                                            <p>GLOBAL</p>
+                                            <p>#1234</p>
+                                        </div>
+                                        <div style={{border: "1px solid #717171"}}></div>
+                                        <div className="profile-content-main-standing-detail">
+                                            <p>LOCAL</p>
+                                            <p>#1234</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <h3 style={{width: "100%", padding: "15px", fontSize: "30px"}}>7 days ago</h3>
+                                <div style={{width: "100%", padding: "0px", boxSizing: "content-box"}}>
+                                    <div className="profile-content2-40lines-more2">
+                                        <div style={{border: "1px solid #3c3c3c", width: "100%"}}></div>
+                                        <div style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "space-around",
+                                            width: "100%",
+                                            padding: "10px"
+                                        }}>
+                                            <div>pps
+                                                - {(userReacordData.data.blitz.record.results.aggregatestats.pps).toFixed(3)}</div>
+                                            <div>finesse
+                                                - {userReacordData.data.blitz.record.results.stats.finesse.faults}F
+                                            </div>
+                                            <div>pices
+                                                - {userReacordData.data.blitz.record.results.stats.piecesplaced} pieces
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div style={{width:"100%", marginTop:"10px", marginBottom:"10px"}}>
-                                <table style={{display: "flex", justifyContent:"space-between", alignItems:"center", gap:"20px", width: "100%"}}>
-                                    <tbody>
-                                    <tr><td>apm : {userProfileData.data.apm}</td></tr>
-                                    <tr><td>glicko : {userProfileData.data.glicko}</td></tr>
-                                    </tbody>
-                                    <tbody>
-                                    <tr><td>pps : {userProfileData.data.pps}</td></tr>
-                                    <tr><td>rd : {userProfileData.data.rd}</td></tr>
-                                    </tbody>
-                                    <tbody>
-                                    <tr><td>vs : {userProfileData.data.vs}</td></tr>
-                                    <tr><td>ㅤ</td></tr>
-                                    </tbody>
-                                </table>
+                            <div className="profile-content2-zen">
+                                <div className="profile-content2-40lines-head">
+                                    <div className="profile-content2-zen-box"><h3>ZEN</h3></div>
+                                </div>
+                                <div className="profile-content2-40lines-records">
+                                    <h1 style={{fontSize: "50px"}}>{userReacordData.data.zen.score}</h1>
+                                    <div className="profile-content-main-standing">
+                                        <div className="profile-content-main-standing-detail">
+                                            <p>GLOBAL</p>
+                                            <p>#1234</p>
+                                        </div>
+                                        <div style={{border: "1px solid #717171"}}></div>
+                                        <div className="profile-content-main-standing-detail">
+                                            <p>LOCAL</p>
+                                            <p>#1234</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <h3 style={{width: "100%", padding: "15px", fontSize: "30px"}}>level {userReacordData.data.zen.level}</h3>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="profile-content2">
-                    <div className="profile-content2-40lines">
-                        <div className="profile-content2-40lines-head">
-                            <div className="profile-content2-40lines-box"><h3>40L</h3></div>
-                            <a style={{textDecoration: "none", color: "white"}}>Replay</a>
-                        </div>
-                        <div className="profile-content2-40lines-records">
-                            <h1 style={{fontSize: "50px"}}>0 : 38</h1>
-                            <div className="profile-content-main-standing">
-                                <div className="profile-content-main-standing-detail">
-                                    <p>GLOBAL</p>
-                                    <p>#1234</p>
+                            <div className="profile-content2-40lines">
+                                <div className="profile-content2-quick-head">
+                                    <div className="profile-content2-quick-box"><h3>{("quickplay & achivement").toUpperCase()}</h3></div>
                                 </div>
-                                <div style={{border: "1px solid #717171"}}></div>
-                                <div className="profile-content-main-standing-detail">
-                                    <p>LOCAL</p>
-                                    <p>#1234</p>
+                                <div className="profile-content2-40lines-records">
+                                    <h1 style={{fontSize: "50px"}}>
+                                        {
+                                            parseInt(((userReacordData.data["40l"].record.results.stats.finaltime) / (1000 * 60)) % 60)
+                                        }
+                                        :
+                                        {
+                                            (((userReacordData.data["40l"].record.results.stats.finaltime) / 1000) % 60).toFixed(2)
+                                        }
+                                    </h1>
+                                    <div className="profile-content-main-standing">
+                                        <div className="profile-content-main-standing-detail">
+                                            <p>GLOBAL</p>
+                                            <p>#1234</p>
+                                        </div>
+                                        <div style={{border: "1px solid #717171"}}></div>
+                                        <div className="profile-content-main-standing-detail">
+                                            <p>LOCAL</p>
+                                            <p>#1234</p>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                        <h3 style={{width: "100%", padding: "15px", fontSize: "30px"}}>7 days ago</h3>
-                    </div>
-                    <div onClick={() => {
-                        setLineView(!lineView)
-                    }} style={{width: "100%", padding: "0px", boxSizing: "content-box"}}>
-                        more
-                        {lineView && <LinesDropDown/>}
-                    </div>
-                    <div className="profile-content2-40lines">
-                        <div className="profile-content2-40lines-head">
-                            <div className="profile-content2-40lines-box"><h3>40L</h3></div>
-                            <a style={{textDecoration: "none", color: "white"}}>Replay</a>
-                        </div>
-                        <div className="profile-content2-40lines-records">
-                            <h1 style={{fontSize: "50px"}}>0 : 38</h1>
-                            <div className="profile-content-main-standing">
-                                <div className="profile-content-main-standing-detail">
-                                    <p>GLOBAL</p>
-                                    <p>#1234</p>
-                                </div>
-                                <div style={{border: "1px solid #717171"}}></div>
-                                <div className="profile-content-main-standing-detail">
-                                    <p>LOCAL</p>
-                                    <p>#1234</p>
-                                </div>
-                            </div>
-                        </div>
-                        <h3 style={{width: "100%", padding: "15px", fontSize: "30px"}}>7 days ago</h3>
-                    </div>
-                    <div onClick={() => {
-                        setLineView(!lineView)
-                    }} style={{
-                        width: "100%",
-                        padding: "0px",
-                        boxSizing: "border-box",
-                        border: "1px solid #717171"
-                    }}>
-                        more
-                        {lineView && <LinesDropDown/>}
-                    </div>
-                    <div className="profile-content2-40lines">
-                        <div className="profile-content2-40lines-head">
-                            <div className="profile-content2-40lines-box"><h3>40L</h3></div>
-                            <a style={{textDecoration: "none", color: "white"}}>Replay</a>
-                        </div>
-                        <div className="profile-content2-40lines-records">
-                            <h1 style={{fontSize: "50px"}}>0 : 38</h1>
-                            <div className="profile-content-main-standing">
-                                <div className="profile-content-main-standing-detail">
-                                    <p>GLOBAL</p>
-                                    <p>#1234</p>
-                                </div>
-                                <div style={{border: "1px solid #717171"}}></div>
-                                <div className="profile-content-main-standing-detail">
-                                    <p>LOCAL</p>
-                                    <p>#1234</p>
+                                <h3 style={{width: "100%", padding: "15px", fontSize: "30px"}}>7 days ago</h3>
+                                <div style={{width: "100%", padding: "0px", boxSizing: "content-box"}}>
+                                    <div className="profile-content2-40lines-more2">
+                                        <div style={{border: "1px solid #3c3c3c", width: "100%"}}></div>
+                                        <div style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "space-around",
+                                            width: "100%",
+                                            padding: "10px"
+                                        }}>
+                                            <div>pps
+                                                - {userReacordData.data["40l"].record.results.aggregatestats.pps}</div>
+                                            <div>finesse
+                                                - {userReacordData.data["40l"].record.results.stats.finesse.faults}F
+                                            </div>
+                                            <div>pices
+                                                - {userReacordData.data["40l"].record.results.stats.piecesplaced} pieces
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <h3 style={{width: "100%", padding: "15px", fontSize: "30px"}}>7 days ago</h3>
-                    </div>
-                    <div onClick={() => {
-                        setLineView(!lineView)
-                    }} style={{
-                        width: "100%",
-                        padding: "0px",
-                        boxSizing: "border-box",
-                        border: "1px solid #717171"
-                    }}>
-                        more
-                        {lineView && <LinesDropDown/>}
-                    </div>
-                </div>
+                    </>
+                ) : (
+                    <p>No data available</p>
+                )}
             </div>
         </>
     );

@@ -29,7 +29,6 @@ function RegisterPage() {
             navigate("/login")
 
 
-            // Set display name
             await updateProfile(createdUser.user, {
                 displayName: data.name
             });

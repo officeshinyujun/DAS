@@ -4,9 +4,10 @@ import { getDatabase, ref, set } from 'firebase/database';
 import app from "../data/firebase";
 import {useNavigate} from "react-router-dom";
 import image from "../data/Group 3.png";
-import React from "react";
+import React, {useState} from "react";
 
 function RegisterPage() {
+    const[userConnet, setUserConnet] = useState('');
     const {
         register,
         handleSubmit,
@@ -35,15 +36,21 @@ function RegisterPage() {
 
             const db = getDatabase();
 
+            
 
             await set(ref(db, `users/${createdUser.user.uid}`), {
                 name: createdUser.user.displayName,
                 email: createdUser.user.email,
+
             });
         } catch (err) {
             console.error(err);
         }
     };
+
+     const onSubmitConnect = async (data) => {
+
+     }
 
     return (
         <div className="login-background">
@@ -70,6 +77,7 @@ function RegisterPage() {
                                     required: true,
                                     minLength: 2,
                                 })}
+                                {(e)=>{}}
                             />
                             <div>ID</div>
                         </div>

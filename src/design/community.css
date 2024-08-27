@@ -30,21 +30,21 @@
     width:90%;
     height:50%;
 }
-.opener-background{
+.community-background{
     background-color: #131620;
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
-.opener-content-lists{
+.community-content-lists{
     width: 90%;
-    height: 300px;
+    height: 200px;
     border: 1px solid #282828;
     display: flex;
-
+    align-items: center;
 }
-.opener-content-list-container{
+.community-content-list-container{
     width: 100%;
     margin: 40px 0 40px 0;
     display: flex;
@@ -53,7 +53,7 @@
     flex-direction: column;
     gap: 40px;
 }
-.opener-content-add-btn{
+.community-content-add-btn{
     width: 100px;
     height: 100px;
     position: fixed;
@@ -63,7 +63,7 @@
     background-color: #131620;
     border: 1.5px solid #7961A8;
 }
-.opener-content-add-btn>p{
+.community-content-add-btn>p{
     font-size: 40px;
     color: white;
 }
@@ -80,7 +80,7 @@
     background-color: #6E3BC1;
     border-radius: 5px;
 }
-.opener-tags{
+.community-tags{
     height: 40px;
     font-size: 30px;
     display: flex;
@@ -89,4 +89,55 @@
     background: linear-gradient(to right,#7961A8, #340089);
     padding: 5px;
     border-radius: 5px;
+}
+.community-tags-search-title{
+    width: 100%;
+    height: 150px;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+.community-tags-search-title>h1{
+    color: white;
+}
+#titleSearch{
+    color: white;
+    height: 40px;
+    width: 205px;
+    border-radius: 5px;
+}
+#titleSearch::placeholder{
+    color: white;
+}
+.detail-modal-container{
+    color: white;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    justify-content: space-between;
+    flex-direction: column;
+}
+.detail-modal-container-head{
+    font-size: 60px;
+}
+.detail-modal-close{
+    width: 70px;
+    height: 50px;
+    background: #6E3BC1;
+    border:none;
+    color: white;
+    border-radius: 5px;
+}
+.detail-modal-tags{
+    width: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+    background: linear-gradient(to right,#8860D8,#340089);
+}
+.detail-modal-tags-list{
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

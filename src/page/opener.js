@@ -1,296 +1,296 @@
-import React, { useEffect, useRef, useState } from "react";
-import Modal from "react-modal";
-import { openerdb, openerstorage } from "../data/openerFirebase";
-import { collection, addDoc, getDocs } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { v4 as uuidv4 } from "uuid";
-import "../design/opener.css"
+import ReactQuill from "react-quill";
 import Header from "../component/header";
+import { useMemo, useRef, useState, useEffect } from "react";
+import { uploadBytes, getDownloadURL, ref } from "firebase/storage";
+import { openerImageDb, openerImagestorage } from "../data/openerImageFirebase";
+import base64 from "base-64";
+import { addDoc, collection, getDocs } from "firebase/firestore";
+import Modal from 'react-modal';
 
-Modal.setAppElement('#root');
+// 모달 스타일
+const modalStyles = {
+    content: {
+        top: '50%',
+        left: '50%',
+        right: 'auto',
+        bottom: 'auto',
+        marginRight: '-50%',
+        transform: 'translate(-50%, -50%)',
+        width: '60%',
+        height: '70%'
+    },
+};
 
-function Opener(key, value) {
-    const [fileUploads, setFileUploads] = useState([]); // 이미지 및 비디오 파일 상태
-    const [title, setTitle] = useState("");
-    const [documents, setDocuments] = useState([]);
+// react-modal 초기화
+Modal.setAppElement('#root'); // #root는 애플리케이션의 루트 DOM 요소입니다.
+
+function Opener() {
+    const quillRef = useRef();
     const [content, setContent] = useState("");
-    const [tagsInput, setTagsInput] = useState("");
-    const fileInputRef = useRef(null);
-    const [searchWhat, setSearch] = useState("");
-    const [ifSearchTags, setIfSearchTags] = useState(false);
-    const [ifSearchTitle, setIfSearchTitle] = useState(false);
-    const [modalOpen, setModalOpen] = useState(false);
-    const [selectItem, setSelectItem] = useState(null);
-    const [tagSearchMode, setTagSearchMode] = useState(false);
-    const [modalOpen2, setModalOpen2] = useState(false);
+    const [contentTitle, setContentTitle] = useState("");
+    const [contentTags, setContentTags] = useState("");
+    const [posts, setPosts] = useState([]); // 글 목록 상태
+    const [filteredPosts, setFilteredPosts] = useState([]); // 필터링된 글 목록 상태
+    const [searchQuery, setSearchQuery] = useState(""); // 검색어 상태
+    const [selectedTags, setSelectedTags] = useState([]); // 선택된 태그 상태
+    const [isModalOpen, setIsModalOpen] = useState(false); // 모달 열림 상태
+    const [modalContent, setModalContent] = useState(null); // 모달에 표시할 상세 내용
+    const [key, setKey] = useState(0); // 리렌더링을 위한 키 값
 
-    const toModalOpen = (item) => {
-        setModalOpen(true);
-        setSelectItem(item);
-    }
+    const decodeToken = () => {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            console.error("Token not found in localStorage.");
+            return null;
+        }
 
-    const closeModal = () => {
-        setModalOpen(false);
-        setSelectItem(null);
-    }
-
-    const uploadFile = async (fileUrls) => {
         try {
-            const tags = tagsInput.split(',').map(tag => tag.trim());
-            const testCollectionRef = collection(openerdb, "test");
-            await addDoc(testCollectionRef, {
-                title: title,
-                content: content,
-                fileUrls: fileUrls, // fileUrls로 통합
-                tags: tags
-            });
-            alert("성공적으로 올라갔습니다!");
-        } catch (error) {
-            console.error("Error writing document: ", error);
+            const payload = token.substring(token.indexOf('.') + 1, token.lastIndexOf('.'));
+            const decode = base64.decode(payload);
+            return JSON.parse(decode);
+        } catch (err) {
+            console.error("Error decoding or parsing token:", err);
+            return null;
         }
     };
 
-    const upload = async () => {
-        if (fileUploads.length === 0) {
-            console.error("No files selected");
-            return;
-        }
+    const imageHandler = () => {
+        const input = document.createElement("input");
+        input.setAttribute("type", "file");
+        input.setAttribute("accept", "image/*");
+        input.click();
 
-        const uploadPromises = fileUploads.map(file => {
-            const fileExtension = file.name.split('.').pop().toLowerCase();
-            const fileType = file.type.startsWith("image/") ? "images" : "videos";
-            const fileRef = ref(openerstorage, `${fileType}/${uuidv4()}.${fileExtension}`);
-            return uploadBytes(fileRef, file).then(snapshot => {
-                return getDownloadURL(snapshot.ref);
-            });
+        input.addEventListener("change", async () => {
+            const editor = quillRef.current.getEditor();
+            const file = input.files[0];
+            const range = editor.getSelection(true);
+            try {
+                const storageRef = ref(
+                    openerImagestorage,
+                    `image/${Date.now()}`
+                );
+                await uploadBytes(storageRef, file).then(snapshot => {
+                    getDownloadURL(snapshot.ref).then((url) => {
+                        editor.insertEmbed(range.index, "image", url);
+                        editor.setSelection(range.index + 1);
+                    });
+                });
+
+            } catch (error) {
+                console.log(error);
+            }
         });
+    };
 
+    const upload = () => {
+        const token = decodeToken();
+        console.log(token);
+
+        // Split tags by #, filter out empty strings, and trim whitespace
+        const tagsArray = contentTags.split('#').filter(tag => tag.trim()).map(tag => tag.trim());
+
+        const openerDocsRef = collection(openerImageDb, 'write');
+        addDoc(openerDocsRef, {
+            title: contentTitle,
+            content: content,
+            tags: tagsArray, // Store the tags array
+            users: token ? token.name : "Anonymous" // Default to "Anonymous" if no token
+        }).then(() => {
+            console.log("Document successfully written!");
+            fetchPosts(); // Refresh the post list after upload
+            setIsModalOpen(false); // Close the modal after upload
+        }).catch((error) => {
+            console.error("Error writing document: ", error);
+        });
+    };
+
+    const fetchPosts = async () => {
+        const openerDocsRef = collection(openerImageDb, 'write');
         try {
-            const urls = await Promise.all(uploadPromises);
-            await uploadFile(urls);
+            const querySnapshot = await getDocs(openerDocsRef);
+            const postsData = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            setPosts(postsData);
+            setFilteredPosts(postsData); // Initialize filtered posts
         } catch (error) {
-            console.error("Error uploading files: ", error);
+            console.error("Error fetching documents: ", error);
         }
     };
 
     useEffect(() => {
-        loadDocs();
+        fetchPosts();
     }, []);
 
-    const loadDocs = async () => {
-        try {
-            const testCollectionRef = collection(openerdb, "test");
-            const lists = await getDocs(testCollectionRef);
-            const data = lists.docs.map(doc => ({
-                ...doc.data(),
-                id: doc.id,
-            }));
-            setDocuments(data);
-            console.log(data);
-            console.log("잘불러옴ㅇㅇ");
-        } catch (error) {
-            console.error("Error loading documents: ", error);
+    useEffect(() => {
+        if (isModalOpen) {
+            setKey(prevKey => prevKey + 1); // Increment key to force re-render of Quill when modal opens
         }
+    }, [isModalOpen]);
+
+    useEffect(() => {
+        // Filter posts based on search query and selected tags
+        const filtered = posts.filter(post => {
+            const title = post.title || ''; // Default to empty string if undefined
+            const content = post.content || ''; // Default to empty string if undefined
+
+            const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                content.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesTags = selectedTags.every(tag => post.tags && post.tags.includes(tag));
+            return matchesSearch && matchesTags;
+        });
+        setFilteredPosts(filtered);
+    }, [searchQuery, selectedTags, posts]);
+
+    const modules = useMemo(() => {
+        return {
+            toolbar: {
+                container: [
+                    [{ header: [1, 2, 3, 4, 5, false] }],
+                    ["bold", "underline"],
+                    ["image"],
+                ],
+                handlers: {
+                    image: imageHandler,
+                },
+            },
+        };
+    }, []);
+
+    // Function to extract the first image from the HTML content
+    const extractFirstImage = (htmlContent) => {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlContent;
+        const img = tempDiv.querySelector('img');
+        return img ? img.src : null;
     };
 
-    const handleFileChange = (e) => {
-        setFileUploads([...e.target.files]);
+    const handleTagClick = (tag) => {
+        setSelectedTags(prevTags => {
+            if (prevTags.includes(tag)) {
+                return prevTags.filter(t => t !== tag);
+            } else {
+                return [...prevTags, tag];
+            }
+        });
     };
 
-    const toSearchTags = () => {
-        if (searchWhat.includes('#')) {
-            setIfSearchTags(true);
-            setIfSearchTitle(false);
-        } else {
-            setIfSearchTitle(true);
-            setIfSearchTags(false);
-        }
-    }
+    const openDetailModal = (post) => {
+        setModalContent(post);
+        setIsModalOpen(true);
+    };
 
-    const writeDocs = () => {
-        let filteredDocs;
-
-        if (ifSearchTags) {
-            filteredDocs = documents.filter(doc => doc.tags && doc.tags.includes(searchWhat));
-        } else if (ifSearchTitle) {
-            filteredDocs = documents.filter(doc => doc.title && doc.title.includes(searchWhat));
-        } else if (tagSearchMode) {
-            const selectedTag = JSON.parse(localStorage.getItem('selectedTag'));
-            filteredDocs = documents.filter(doc => doc.tags && doc.tags.includes(selectedTag));
-        }
-        else {
-            filteredDocs = documents;
-        }
-
-        return (
-            <>
-                {filteredDocs.map(doc => (
-                    <div className="opener-content-lists" key={doc.id} onClick={() => toModalOpen(doc)}>
-                        <div style={{display: "flex", justifyContent: "center", alignItems: "center"}}>
-                            {doc.fileUrls && doc.fileUrls.length > 0 && (() => {
-                                const url = doc.fileUrls[0]; // 배열의 첫 번째 항목만 가져옵니다.
-                                const isVideo = url.includes('.mp4') || url.includes('.mov') || url.includes('.avi'); // 파일 확장자를 기준으로 비디오 여부 확인
-                                return isVideo ? (
-                                    <video key={0} src={url} controls style={{ width: "300px", margin: "10px" }} />
-                                ) : (
-                                    <img key={0} src={url} alt={`image-0`} style={{ width: "300px", margin: "10px" }} />
-                                );
-                            })()}
-                        </div>
-                        <div style={{
-                            color: "white",
-                            display: "flex",
-                            justifyContent: "space-between",
-                            flexDirection: "column",
-                            padding: "10px"
-                        }}>
-                            <h1>{doc.title}</h1>
-                            <p style={{color: "gray"}}>{doc.content}</p>
-                            <div style={{display:"flex", flexDirection:"row", gap:"20px"}}>
-                                {Array.isArray(doc.tags) && doc.tags.length > 0 ? (
-                                    doc.tags.map((tag, index) => (
-                                        <span
-                                            key={index}
-                                            className="opener-tags"
-                                        >
-        {tag}
-      </span>
-                                    ))
-                                ) : ''}
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </>
-        );
-    }
-
-    const tagSearch = (tag) => {
-        setTagSearchMode(true);
-        console.log(tag);
-        localStorage.setItem('selectedTag', JSON.stringify(tag));
-        setModalOpen(false);
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setModalContent(null); // Clear modal content when closing
     };
 
     return (
-        <div className="opener-background">
-            {modalOpen2 && (
-                <div className="modal2background">
-                    <div className="modal2-container">
-                    <input
-                            ref={fileInputRef}
-                            type="file"
-                            multiple
-                            accept="image/*,video/*"
-                            onChange={handleFileChange}
-                            className="modal-container2-file"
-                        />
-                        <input
-                            style={{color: "blue"}}
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                        />
-                        <input
-                            value={content}
-                            onChange={(e) => setContent(e.target.value)}
-                        />
-                        <input
-                            value={tagsInput}
-                            onChange={(e) => setTagsInput(e.target.value)}
-                            placeholder="태그를 쉼표로 구분하여 입력하세요"
-                        />
-                        <button onClick={upload}>Upload</button>
-                        <button onClick={()=>{setModalOpen2(false)}}>X</button>
-                    </div>
-                </div>
-            )}
-            <Header/>
-            {tagSearchMode === false && (
-                <div style={{display: "flex", justifyContent: "flex-start", width: "90%", marginTop:"30px"}}>
-                    <div style={{background:"#282828", width:"280px", borderRadius:"5px", height:"44px", display:"flex", flexDirection:"row", alignItems:"center", justifyContent:"center"}}>
-                        <input
-                            className="tagsearch-input"
-                            value={searchWhat}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="검색할 태그나 제목을 입력하세요"
-                        />
-                        <button onClick={toSearchTags}
-                                className="tagsearch-button"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 20 20"
-                                 fill="none">
-                                <path
-                                    d="M16.6666 16.6667L13.6794 13.6794M13.6794 13.6794C14.7762 12.5827 15.4545 11.0675 15.4545 9.39393C15.4545 6.04675 12.7411 3.33333 9.39392 3.33333C6.04674 3.33333 3.33331 6.04675 3.33331 9.39393C3.33331 12.7411 6.04674 15.4545 9.39392 15.4545C11.0675 15.4545 12.5827 14.7762 13.6794 13.6794Z"
-                                    stroke="#686B6E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            )}
-            {tagSearchMode && (
-                <div>
-                    <h1>{localStorage.getItem('selectedTag')}</h1>
-                </div>
-            )}
-            <div className="opener-content-list-container">
-                {writeDocs()}
-            </div>
-            <button onClick={() => {
-                setModalOpen2(true)
-            }} className="opener-content-add-btn">
-                <p>+</p>
-            </button>
+        <>
+            <Header />
+            <button onClick={() => setIsModalOpen(true)}>Open Upload Modal</button>
 
-            <Modal
-                isOpen={modalOpen}
-                onRequestClose={closeModal}
-                style={{
-                    content: {
-                        top: '50%',
-                        left: '50%',
-                        right: 'auto',
-                        bottom: 'auto',
-                        marginRight: '-50%',
-                        transform: 'translate(-50%, -50%)',
-                        width: '90%',
-                        height: '90%'
-                    },
-                    overlay: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.75)'
-                    }
-                }}
-                contentLabel="Selected Document"
-            >
-                {selectItem && (
-                    <div>
-                        <h2>{selectItem.title}</h2>
-                        {selectItem.fileUrls && selectItem.fileUrls.map((url, index) => {
-                            const isVideo = url.includes('.mp4') || url.includes('.mov') || url.includes('.avi'); // 파일 확장자를 기준으로 비디오 여부 확인
-                            return isVideo ? (
-                                <video key={index} src={url} controls style={{ width: "100px", margin: "10px" }} />
-                            ) : (
-                                <img key={index} src={url} alt={`image-${index}`} style={{ width: "100px", margin: "10px" }} />
-                            );
-                        })}
-                        <div>{selectItem.content}</div>
-                        <div>
-                            {Array.isArray(selectItem.tags) ?
-                                selectItem.tags.map((tag, index) => (
-                                    <span
-                                        key={index}
-                                        onClick={() => tagSearch(tag)}
-                                        style={{marginRight: '10px', cursor: 'pointer'}}
+            <div>
+                <h2>Posts</h2>
+                <input
+                    type="text"
+                    placeholder="Search posts"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{ width: "100%", marginBottom: "10px" }}
+                />
+                {filteredPosts.map(post => (
+                    <div key={post.id} style={{border: '1px solid #ccc', padding: '10px', margin: '10px 0', cursor: 'pointer'}} onClick={() => openDetailModal(post)}>
+                        <p><strong>Title:</strong> {post.title}</p>
+                        <p><strong>Author:</strong> {post.users}</p>
+                        {/* Display the first image as a preview */}
+                        {extractFirstImage(post.content) && (
+                            <img
+                                src={extractFirstImage(post.content)}
+                                alt="Preview"
+                                style={{ maxWidth: '100px', maxHeight: '100px', display: 'block', margin: '10px 0' }}
+                            />
+                        )}
+                        {/* Display Tags with clickable tags */}
+                        {post.tags && post.tags.length > 0 && (
+                            <p>
+                                <strong>Tags:</strong>
+                                {post.tags.map(tag => (
+                                    <button
+                                        key={tag}
+                                        onClick={() => handleTagClick(tag)}
+                                        style={{ margin: '0 5px', cursor: 'pointer' }}
                                     >
-                                        {tag}
-                                    </span>
-                                ))
-                                : ''}
-                        </div>
-                        <button onClick={closeModal}>Close</button>
+                                        #{tag}
+                                    </button>
+                                ))}
+                            </p>
+                        )}
                     </div>
+                ))}
+            </div>
+
+            {/* Detail Modal Component */}
+            <Modal
+                isOpen={modalContent !== null} // Show detail modal only if there's content
+                onRequestClose={closeModal}
+                style={modalStyles}
+                contentLabel="Post Detail Modal"
+            >
+                {modalContent && (
+                    <>
+                        <h2>{modalContent.title}</h2>
+                        <div
+                            dangerouslySetInnerHTML={{ __html: modalContent.content }}
+                            style={{ marginBottom: '20px' }}
+                        />
+                        <p><strong>Tags:</strong> {modalContent.tags && modalContent.tags.join(', ')}</p>
+                        <div style={{ textAlign: 'right' }}>
+                            <button onClick={closeModal}>Close</button>
+                        </div>
+                    </>
                 )}
             </Modal>
-        </div>
+
+            {/* Upload Modal Component */}
+            <Modal
+                isOpen={isModalOpen && modalContent === null} // Show upload modal only if detail modal is not open
+                onRequestClose={closeModal}
+                style={modalStyles}
+                contentLabel="Upload Modal"
+            >
+                <h2>Write and Upload Content</h2>
+                <input
+                    type="text"
+                    placeholder="Enter title"
+                    value={contentTitle}
+                    onChange={(e) => setContentTitle(e.target.value)}
+                    style={{ width: "100%", marginBottom: "10px" }}
+                />
+                <ReactQuill
+                    key={key} // Key value for re-rendering
+                    style={{ width: "100%", height: "300px" }}
+                    placeholder="Write something..."
+                    theme="snow"
+                    ref={quillRef}
+                    value={content}
+                    onChange={setContent}
+                    modules={modules}
+                />
+                <input
+                    type="text"
+                    placeholder="Enter Tags separated by #"
+                    value={contentTags}
+                    onChange={(e) => setContentTags(e.target.value)}
+                    style={{ width: "95%", position:"absolute"}}
+                />
+                <div style={{ marginTop: '40px', textAlign: 'right' }}>
+                    <button onClick={upload} style={{ marginRight: '10px' }}>Upload</button>
+                    <button onClick={closeModal}>Close</button>
+                </div>
+            </Modal>
+        </>
     );
 }
 

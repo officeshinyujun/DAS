@@ -4,7 +4,7 @@ import base64 from "base-64";
 import "../design/profile.css";
 import date from "date-and-time";
 
-function Profile() {
+function UserProfile() {
     const [userProfileData, setUserProfileData] = useState(null);
     const [userFlag, setUserFlag] = useState('');
     const [bannerImage, setBannerimage] = useState('');
@@ -24,29 +24,8 @@ function Profile() {
         "https://tetr.io/res/badges/twc23_t8.png"
     ];
 
-    const decodeToken = () => {
-        const token = localStorage.getItem('authToken');
-        if (!token) {
-            console.error("Token not found in localStorage.");
-            return null;
-        }
-
-        try {
-            const payload = token.substring(token.indexOf('.') + 1, token.lastIndexOf('.'));
-            const decode = base64.decode(payload);
-            return JSON.parse(decode);
-        } catch (err) {
-            console.error("Error decoding or parsing token:", err);
-            return null;
-        }
-    };
-
     useEffect(() => {
-        const decodedData = decodeToken();
-        if (decodedData) {
-            setUserDecodeName(decodedData);
-            loadData(decodedData);
-        }
+        loadData(localStorage.getItem('whoUsers'));
     }, []);
 
     const forthynow = () => {
@@ -65,12 +44,11 @@ function Profile() {
 
     const loadData = async (decodedData) => {
         if (!decodedData) return;
-
         console.log(decodedData);
         setIsLoading(true);
 
         try {
-            const userResponse = await fetch(`http://127.0.0.1:8000/users/${decodedData.name}`);
+            const userResponse = await fetch(`http://127.0.0.1:8000/users/${decodedData}`);
             if (!userResponse.ok) {
                 throw new Error("Failed to fetch user data.");
             }
@@ -78,7 +56,7 @@ function Profile() {
             console.log(userData)
             setUserProfileData(userData);
 
-            const recordResponse = await fetch(`http://127.0.0.1:8000/users/${decodedData.name}/summaries`);
+            const recordResponse = await fetch(`http://127.0.0.1:8000/users/${decodedData}/summaries`);
             if (!recordResponse.ok) {
                 throw new Error("Failed to fetch record data.");
             }
@@ -281,7 +259,7 @@ function Profile() {
                                         </div>
                                     </div>
                                 </div>
-                        </div>
+                            </div>
                             <div className="profile-content2-40lines">
                                 <div className="profile-content2-40lines-head">
                                     <div className="profile-content2-blitz-box"><h3>BLITZ</h3></div>
@@ -371,4 +349,4 @@ function Profile() {
     );
 }
 
-export default Profile;
+export default UserProfile;

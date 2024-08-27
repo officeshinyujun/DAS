@@ -7,4 +7,4 @@ function Tonew() {
         </>
     )
 }
-export default Tonew
+export default Tonew;

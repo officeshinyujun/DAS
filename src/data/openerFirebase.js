@@ -7,13 +7,13 @@ import { getFirestore } from 'firebase/firestore';
 
 // Your web app's Firebase configuration
 const openerfirebaseConfig = {
-    apiKey: "AIzaSyAAdqNRSfVngij-PO0ALDTTfsP5uZLuB1M",
-    authDomain: "tetrisopener.firebaseapp.com",
-    projectId: "tetrisopener",
-    storageBucket: "tetrisopener.appspot.com",
-    messagingSenderId: "875551200845",
-    databaseURL : "https://tetrisopener-default-rtdb.asia-southeast1.firebasedatabase.app/",
-    appId: "1:875551200845:web:3ed611438bc2dc4d26ee04"
+    apiKey: process.env.REACT_APP_COMMUNITY_API_KEY,
+    authDomain: process.env.REACT_APP_COMMUNITY_AUTH_DOMAIN,
+    projectId: process.env.REACT_APP_COMMUNITY_PROJECTID,
+    storageBucket: process.env.REACT_APP_COMMUNITY_STORAGE_BUCKET,
+    messagingSenderId: process.env.REACT_APP_COMMUNITY_MESSAGINGSENDERID,
+    databaseURL : process.env.REACT_APP_COMMUNITY_DATABASE_URL,
+    appId: process.env.REACT_APP_COMMUNITY_APPID
 };
 
 // Initialize Firebase

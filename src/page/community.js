@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Modal from "react-modal";
 import { openerdb, openerstorage } from "../data/openerFirebase";
+import {chatapp,chatdb, chatstorage} from "../data/connectUserFirebase";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { v4 as uuidv4 } from "uuid";
@@ -70,6 +71,7 @@ function Community(key, value) {
             console.error("Error writing document: ", error);
         }
     };
+
 
     const upload = async () => {
         if (fileUploads.length === 0) {

@@ -4,13 +4,13 @@ import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyCBpP5xpAVFfhRa3J_smIzTcw70PU5y_lQ",
-    authDomain: "profiletetris.firebaseapp.com",
-    projectId: "profiletetris",
-    storageBucket: "profiletetris.appspot.com",
-    databaseURL: "https://profiletetris-default-rtdb.asia-southeast1.firebasedatabase.app/",
-    messagingSenderId: "112400262733",
-    appId: "1:112400262733:web:276e1c12a1e465f1a4de04"
+    apiKey: process.env.REACT_APP_ACCOUNT_API_KEY,
+    authDomain: process.env.REACT_APP_ACCOUNT_AUTH_DOMAIN,
+    projectId: process.env.REACT_APP_ACCOUNT_PROJECTID,
+    storageBucket: process.env.REACT_APP_ACCOUNT_STORAGE_BUCKET,
+    databaseURL: process.env.REACT_APP_ACCOUNT_DATABASE_URL,
+    messagingSenderId: process.env.REACT_APP_ACCOUNT_MESSAGINGSENDERID,
+    appId: process.env.REACT_APP_ACCOUNT_APPID
 };
 
 // Initialize Firebase

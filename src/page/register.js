@@ -2,12 +2,15 @@ import { useForm } from "react-hook-form";
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { getDatabase, ref, set } from 'firebase/database';
 import app from "../data/firebase";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import image from "../data/Group 3.png";
-import React, {useState} from "react";
+import React, { useState } from "react";
+import { addDoc, collection, getDocs, query, where, setDoc, doc } from "firebase/firestore";
+import { chatdb, chatapp } from "../data/connectUserFirebase";
+import base64 from "base-64";
 
 function RegisterPage() {
-    const[userConnet, setUserConnet] = useState('');
+    const [error, setError] = useState('');
     const {
         register,
         handleSubmit,
@@ -17,40 +20,51 @@ function RegisterPage() {
     const navigate = useNavigate();
     const auth = getAuth(app);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const onSubmit = async (data) => {
         try {
+            // Check if username already exists
+            const userConnectRef = collection(chatdb, 'userConnect');
+            const q = query(userConnectRef, where("username", "==", data.name));
+            const querySnapshot = await getDocs(q);
+            if (!querySnapshot.empty) {
+                setError('Username already exists. Please choose a different one.');
+                return;
+            }
+
+            // Create user in Firebase Authentication
             const createdUser = await createUserWithEmailAndPassword(
                 auth,
                 data.email,
                 data.password,
             );
-            console.log(createdUser);
-            console.log(createdUser.token);
-            navigate("/login")
 
-
+            // Update user profile
             await updateProfile(createdUser.user, {
                 displayName: data.name
             });
 
+            // Add user to Realtime Database
             const db = getDatabase();
-
-            
-
             await set(ref(db, `users/${createdUser.user.uid}`), {
                 name: createdUser.user.displayName,
                 email: createdUser.user.email,
-
             });
+
+            // Add user to Firestore
+            await setDoc(doc(userConnectRef, data.name), {
+                username: data.name,
+                userConnect: ""
+            });
+
+            console.log("User created successfully:", createdUser);
+
+            // Navigate to login page
+            navigate("/login");
         } catch (err) {
-            console.error(err);
+            console.error("Error during registration:", err);
+            setError(err.message);
         }
     };
-
-     const onSubmitConnect = async (data) => {
-
-     }
 
     return (
         <div className="login-background">
@@ -68,6 +82,7 @@ function RegisterPage() {
                     marginTop: "40px"
                 }}>Join</h1>
                 <div className="login-container">
+                    {error && <p style={{color: 'red'}}>{error}</p>}
                     <form onSubmit={handleSubmit(onSubmit)}>
                         <div>
                             <input
@@ -77,8 +92,9 @@ function RegisterPage() {
                                     required: true,
                                     minLength: 2,
                                 })}
-                                {(e)=>{}}
                             />
+                            {errors.name && errors.name.type === 'required' && <p>Name is required!</p>}
+                            {errors.name && errors.name.type === 'minLength' && <p>Name must be at least 2 characters long!</p>}
                             <div>ID</div>
                         </div>
                         <div>
@@ -90,7 +106,8 @@ function RegisterPage() {
                                     pattern: /^\S+@\S+$/i
                                 })}
                             />
-                            {errors.email && <p>이메일이 잘못되었습니다!</p>}
+                            {errors.email && errors.email.type === 'required' && <p>Email is required!</p>}
+                            {errors.email && errors.email.type === 'pattern' && <p>Invalid email format!</p>}
                             <div>Email</div>
                         </div>
                         <div>
@@ -103,10 +120,10 @@ function RegisterPage() {
                                     maxLength: 20,
                                 })}
                             />
-                            {errors.password && errors.password.type === 'required' && <p>비밀번호가 필요합니다!</p>}
-                            {errors.password && errors.password.type === 'minLength' && <p>비밀번호는 최소 6자 이상이어야 합니다!</p>}
-                            {errors.password && errors.password.type === 'maxLength' && <p>비밀번호는 최대 20자 이하여야 합니다!</p>}
-                            <div>password</div>
+                            {errors.password && errors.password.type === 'required' && <p>Password is required!</p>}
+                            {errors.password && errors.password.type === 'minLength' && <p>Password must be at least 6 characters long!</p>}
+                            {errors.password && errors.password.type === 'maxLength' && <p>Password must be no more than 20 characters long!</p>}
+                            <div>Password</div>
                         </div>
                         <button type="submit" value="Register">Join</button>
                     </form>

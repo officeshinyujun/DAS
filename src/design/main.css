@@ -6,12 +6,15 @@
 
 .main-container {
     width: 100%;
-    height: 300vh;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background-color: #131620;
+    background-image: url("../design/background.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    justify-content: center;
+    align-items: center;
 }
-
 .tomodalopen {
     position: fixed;
     top: 37%; /* 버튼의 상단 위치 */
@@ -27,7 +30,6 @@
     text-align: center;
     z-index: 1000; /* 버튼을 다른 요소들 위에 위치시킴 */
 }
-
 .navigate-container {
     position: fixed;
     top: 8%;
@@ -39,7 +41,6 @@
     align-items: flex-start; /* 위쪽에 고정 */
     z-index: 1001; /* 네비게이션 바를 다른 요소들 위에 위치시킴 */
 }
-
 .tomodal {
     position: fixed;
     top: 0;
@@ -49,16 +50,83 @@
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 1000; /* 반투명 배경을 다른 요소들 위에 위치시킴 */
 }
-.main-box{
-    width: 90%;
-    height: 35vh;
-    background:linear-gradient(0.25turn,#7961A8, #233354);
-    margin-top: 60px;
-}
 .main-header-container{
     display: flex;
     flex-direction: row;
 }
 .main-bar{
     margin:30px;
+}
+.main-title{
+    color: white;
+    display: flex;
+    gap: 30px;
+    align-items: center;
+    font-size: 50px;
+    font-weight: bold;
+}
+.main-content{
+    display: flex;
+    gap: 70px;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+}
+.main-content2{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
+    width: 70vw;
+    box-sizing: border-box;
+}
+.main-content2-list{
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.main-content2-tonew{
+    width: 500px;
+    height: 300px;
+    border: 1px solid #ff9f5f;
+    border-radius: 10px;
+    background-color: rgba(255, 159, 95, 0.4);
+}
+.main-content2-opener{
+    width: 900px;
+    height: 300px;
+    border: 1px solid #ff5f5f;
+    border-radius: 10px;
+    background: rgba(255, 95, 95, 0.3);
+}
+.main-content2-community{
+    width: 900px;
+    height: 300px;
+    border: 1px solid #6780ff;
+    border-radius: 10px;
+    background: rgba(103, 128, 255, 0.3);
+}
+.main-content2-profile{
+    width: 500px;
+    height: 300px;
+    border: 1px solid #7f5fff;
+    border-radius: 10px;
+    background-color: rgba(127, 95, 255, 0.4);
+}
+.main-content2-modal{
+    width: 100%;
+    height: 200px;
+    border: 1px solid red;
+}
+.gradiant-circle1{
+    width: 1080px;
+    height: 1080px;
+    position: absolute;
+    border-radius: 50%;
+    left: -560px;
+    top: 60vh;
+    background: radial-gradient(rgba(121, 97 , 168, 93%), rgba(61,49,84,55%), rgba(0,0,0,0));
+
 }

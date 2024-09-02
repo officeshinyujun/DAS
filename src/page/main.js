@@ -4,11 +4,12 @@ import { getAuth } from "firebase/auth";
 import NavigateLeft from "../component/navigateleftbar";
 import { motion, AnimatePresence } from "framer-motion";
 import "../design/main.css";
-import image from "../data/Group 3.png";
+import image from "../design/DAT 로고 1.png";
 import app from "../data/firebase";
 
 function Main() {
     const [modal, setModal] = useState(false);
+    const [modal2, setModal2] = useState(false);
     const auth = getAuth(app);
     const [profileId, setProfileId] = useState(null);
     const navigate = useNavigate();
@@ -33,25 +34,25 @@ function Main() {
         setModal(false);
     };
 
-    const inputId = (e) => {
-        const id = e.target.value;
-        setProfileId(id);
-    };
-
-    const modalimg = () => {
-        // 구현 필요
-    };
-
-    const modalid = () => {
-        // 구현 필요
-    };
-
     return (
         <div className="main-container">
-            <div className="main-header-container">
-                <img src={image} style={{width: '80px', height: '80px', marginTop: "20px", marginLeft: "20px"}}
-                     alt="Logo"/>
-                <h1 style={{color: "white", fontSize: "80px", marginLeft: "20px", marginTop: "15px"}}>ARR</h1>
+            <div className="main-content">
+                <div className="main-title">
+                    <img src={image} style={{width: "40px", height: "40px"}}/>
+                    <p>DAT</p>
+                </div>
+                <div className="main-content2">
+                    <div className="main-content2-list">
+                        <div className="main-content2-tonew" onClick={() => {
+                            document.getElementsByClassName("main-content2-tonew")[0].style.width = "600px";
+                        }}></div>
+                        <div className="main-content2-opener"></div>
+                    </div>
+                    <div className="main-content2-list">
+                        <div className="main-content2-community"></div>
+                        <div className="main-content2-profile"></div>
+                    </div>
+                </div>
             </div>
             <div onClick={modalOpen} className="tomodalopen">I</div>
             <AnimatePresence>
@@ -74,33 +75,6 @@ function Main() {
                     </motion.div>
                 )}
             </AnimatePresence>
-            <div style={{display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "center"}}>
-                <motion.div className="main-box" whileHover={{width: "95%", height: "40vh"}}>
-                    < div className="main-bar">
-                        <span style={{fontSize: "70px", fontWeight: "bold", color: "white"}}>초보</span>
-                        <span style={{fontSize: "70px", color: "white"}}>분들을 위한</span>
-                        <div style={{fontSize: "70px", color: "white"}}>간편한 시스템</div>
-                    </div>
-                </motion.div>
-            </div>
-            <div style={{display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "center"}}>
-                <motion.div className="main-box" whileHover={{width: "95%", height: "40vh"}}>
-                    < div className="main-bar">
-                        <span style={{fontSize: "70px", fontWeight: "bold", color: "white"}}>초보</span>
-                        <span style={{fontSize: "70px", color: "white"}}>분들을 위한</span>
-                        <div style={{fontSize: "70px", color: "white"}}>간편한 시스템</div>
-                    </div>
-                </motion.div>
-            </div>
-            <div style={{display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "center"}}>
-                <motion.div className="main-box" whileHover={{width: "95%", height: "40vh"}}>
-                    < div className="main-bar">
-                        <span style={{fontSize: "70px", fontWeight: "bold", color: "white"}}>초보</span>
-                        <span style={{fontSize: "70px", color: "white"}}>분들을 위한</span>
-                        <div style={{fontSize: "70px", color: "white"}}>간편한 시스템</div>
-                    </div>
-                </motion.div>
-            </div>
         </div>
     );
 }

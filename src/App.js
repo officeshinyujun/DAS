@@ -8,6 +8,7 @@ import Opener from "./page/opener";
 import Tonew from "./page/tonew";
 import Community from "./page/community";
 import Profile from "./page/profile";
+import Message from "./page/message";
 import UserProfile from "./page/usersProfile"
 function App() {
     return(
@@ -22,6 +23,7 @@ function App() {
                     <Route path="/community" element={<Community/>}/>
                     <Route path="/profile" element={<Profile/>}/>
                     <Route path ="/userProfile" element={<UserProfile/>}/>
+                    <Route path ="/message" element={<Message/>}/>
                 </Routes>
             </BrowserRouter>
         </>

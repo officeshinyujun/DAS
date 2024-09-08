@@ -6,6 +6,7 @@ import { openerImageDb, openerImagestorage } from "../data/openerImageFirebase";
 import base64 from "base-64";
 import { addDoc, collection, getDocs } from "firebase/firestore";
 import Modal from 'react-modal';
+import "../design/opener.css"
 
 // 모달 스타일
 const modalStyles = {
@@ -61,6 +62,7 @@ function Opener() {
         input.click();
 
         input.addEventListener("change", async () => {
+            if (!quillRef.current) return; // Add check to ensure quillRef is available
             const editor = quillRef.current.getEditor();
             const file = input.files[0];
             const range = editor.getSelection(true);
@@ -158,7 +160,6 @@ function Opener() {
         };
     }, []);
 
-    // Function to extract the first image from the HTML content
     const extractFirstImage = (htmlContent) => {
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = htmlContent;
@@ -187,51 +188,55 @@ function Opener() {
     };
 
     return (
-        <>
+        <div className="opener-container">
             <Header />
-            <button onClick={() => setIsModalOpen(true)}>Open Upload Modal</button>
-
-            <div>
-                <h2>Posts</h2>
+            <div className="opener-content-searchandadd">
                 <input
                     type="text"
-                    placeholder="Search posts"
+                    placeholder="   Search posts"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    style={{ width: "100%", marginBottom: "10px" }}
                 />
+                <button onClick={() => setIsModalOpen(true)}>Add</button>
+            </div>
+            <div className="opener-content-postlist">
                 {filteredPosts.map(post => (
-                    <div key={post.id} style={{border: '1px solid #ccc', padding: '10px', margin: '10px 0', cursor: 'pointer'}} onClick={() => openDetailModal(post)}>
-                        <p><strong>Title:</strong> {post.title}</p>
-                        <p><strong>Author:</strong> {post.users}</p>
-                        {/* Display the first image as a preview */}
-                        {extractFirstImage(post.content) && (
-                            <img
-                                src={extractFirstImage(post.content)}
-                                alt="Preview"
-                                style={{ maxWidth: '100px', maxHeight: '100px', display: 'block', margin: '10px 0' }}
-                            />
-                        )}
-                        {/* Display Tags with clickable tags */}
-                        {post.tags && post.tags.length > 0 && (
-                            <p>
-                                <strong>Tags:</strong>
-                                {post.tags.map(tag => (
-                                    <button
-                                        key={tag}
-                                        onClick={() => handleTagClick(tag)}
-                                        style={{ margin: '0 5px', cursor: 'pointer' }}
-                                    >
-                                        #{tag}
-                                    </button>
-                                ))}
-                            </p>
-                        )}
+                    <div key={post.id}
+                         className="opener-content-posts"
+                         style={{padding: '20px', cursor: 'pointer'}} onClick={() => openDetailModal(post)}>
+                        <div>
+                            {extractFirstImage(post.content) && (
+                                <img
+                                    src={extractFirstImage(post.content)}
+                                    alt="Preview"
+                                    style={{ height: '14.5rem',maxWidth:"19vw", display: 'block', margin: '10px 0' }}
+                                />
+                            )}
+                        </div>
+                        <div className="opener-content-posts-prebviewText">
+                            <div style={{display: "flex", flexDirection:"column", justifyContent:"center"}}>
+                                <p style={{fontSize:"50px", color:"white", fontWeight:"bolder"}}>{post.title}</p>
+                                <p style={{fontSize:"20px", color:"#a1a1a1"}}>{post.users}</p>
+                            </div>
+                            {post.tags && post.tags.length > 0 && (
+                                <div className="opener-content-posts-tags-list">
+                                    {post.tags.map(tag => (
+                                        <div
+                                            className="opener-content-posts-tags"
+                                            key={tag}
+                                            onClick={() => handleTagClick(tag)}
+                                            style={{ cursor: 'pointer' }}
+                                        >
+                                            #{tag}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 ))}
             </div>
 
-            {/* Detail Modal Component */}
             <Modal
                 isOpen={modalContent !== null} // Show detail modal only if there's content
                 onRequestClose={closeModal}
@@ -245,7 +250,20 @@ function Opener() {
                             dangerouslySetInnerHTML={{ __html: modalContent.content }}
                             style={{ marginBottom: '20px' }}
                         />
-                        <p><strong>Tags:</strong> {modalContent.tags && modalContent.tags.join(', ')}</p>
+                        <p>
+                            <strong>Tags:</strong>
+                            {Array.isArray(modalContent.tags) ? (
+                                modalContent.tags.map((tag, index) => (
+                                    <span
+                                        key={index}
+                                        onClick={() => handleTagClick(tag)} // Fix the onClick handler
+                                        style={{ cursor: 'pointer', marginRight: '5px' }}
+                                    >
+                                        #{tag}
+                                    </span>
+                                ))
+                            ) : ''}
+                        </p>
                         <div style={{ textAlign: 'right' }}>
                             <button onClick={closeModal}>Close</button>
                         </div>
@@ -290,7 +308,7 @@ function Opener() {
                     <button onClick={closeModal}>Close</button>
                 </div>
             </Modal>
-        </>
+        </div>
     );
 }
 

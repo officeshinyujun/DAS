@@ -1,0 +1,114 @@
+.message-container{
+    width: 100vw;
+    min-height: 100vh;
+    background-image: url("../design/background.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    align-items: center;
+    flex-direction: column;
+    display: flex;
+    color: white;
+}
+.message-content-users{
+    width: 90vw;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 5vw;
+    height: 7vh;
+    margin-top:3vh;
+    margin-bottom: 3vh;
+}
+.message-content-users-profile{
+    width: 4vw;
+    height: 4vw;
+    border-radius: 50%;
+    background-color: gray;
+    color: white;
+}
+.message-content-chatList{
+    width: 50vw;
+    height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+.message-content-chat-input{
+    width: 90%;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+.message-content-chat-input>input{
+    width: 90%;
+    height: 2.1rem;
+    border: 1px solid #4C3999;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding-left: 1rem;
+    line-height: 1.7rem;
+    border-radius: 5px;
+}
+.message-content-chat-input>button{
+    height: 2.1rem;
+    background: linear-gradient(#7F5FFF, #4C3999);
+    border:none;
+    border-radius: 5px;
+    padding: 0px 10px;
+    color: white;
+    font-weight: bolder;
+}
+.message-content-chatList2{
+    width: 90%;
+    height: 90%;
+    overflow: auto;
+}
+.me {
+    padding: 10px;
+    border-radius: 5px;
+    margin: 5px;
+    width: 95%;
+    display: flex;
+    justify-content: end;
+}
+
+.others {
+    padding: 10px;
+    display: flex;
+    justify-content: start;
+    width: 95%;
+    border-radius: 5px;
+    margin: 5px;
+    align-items: center;
+    gap: 1rem;
+}
+.others-profile{
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background-color: gray;
+}
+.me-box{
+    padding: 00px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    height: 3rem;
+    background: linear-gradient(#7F5FFF, #4C3999);
+    border:none;
+    border-radius: 5px;
+}
+.others-box{
+    padding: 00px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 3rem;
+    background: black;
+    border: 1px solid #4C3999;
+    border-radius: 5px;
+}

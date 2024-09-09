@@ -1,11 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import Modal from "react-modal";
 import { openerdb, openerstorage } from "../data/openerFirebase";
-import {chatapp,chatdb, chatstorage} from "../data/connectUserFirebase";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { v4 as uuidv4 } from "uuid";
-import "../design/community.css"; // 스타일 시트 이름 변경
+import "../design/community.css";
 import Header from "../component/header";
 import base64 from "base-64";
 import { Link } from "react-router-dom";
@@ -13,7 +12,7 @@ import { Link } from "react-router-dom";
 Modal.setAppElement('#root');
 
 function Community(key, value) {
-    const [fileUploads, setFileUploads] = useState([]); // 이미지 및 비디오 파일 상태
+    const [fileUploads, setFileUploads] = useState([]);
     const [title, setTitle] = useState("");
     const [documents, setDocuments] = useState([]);
     const [content, setContent] = useState("");
@@ -62,7 +61,7 @@ function Community(key, value) {
             await addDoc(testCollectionRef, {
                 title: title,
                 content: content,
-                fileUrls: fileUrls, // fileUrls로 통합
+                fileUrls: fileUrls,
                 tags: tags,
                 users: users.name
             });
@@ -71,7 +70,6 @@ function Community(key, value) {
             console.error("Error writing document: ", error);
         }
     };
-
 
     const upload = async () => {
         if (fileUploads.length === 0) {
@@ -110,7 +108,7 @@ function Community(key, value) {
             }));
             setDocuments(data);
             console.log(data);
-            console.log("잘불러옴ㅇㅇ");
+            console.log("잘 불러옴ㅇㅇ");
         } catch (error) {
             console.error("Error loading documents: ", error);
         }
@@ -118,6 +116,13 @@ function Community(key, value) {
 
     const handleFileChange = (e) => {
         setFileUploads([...e.target.files]);
+    };
+
+    // Enter 키로 검색 기능 실행
+    const handleKeyDown = (e) => {
+        if (e.key === "Enter") {
+            toSearchTags();
+        }
     };
 
     const toSearchTags = () => {
@@ -150,42 +155,33 @@ function Community(key, value) {
                     <div className="community-content-lists" key={doc.id} onClick={() => toModalOpen(doc)}>
                         <div style={{display: "flex", justifyContent: "center", alignItems: "center"}}>
                             {doc.fileUrls && doc.fileUrls.length > 0 && (() => {
-                                const url = doc.fileUrls[0]; // 배열의 첫 번째 항목만 가져옵니다.
-                                const isVideo = url.includes('.mp4') || url.includes('.mov') || url.includes('.avi'); // 파일 확장자를 기준으로 비디오 여부 확인
+                                const url = doc.fileUrls[0];
+                                const isVideo = url.includes('.mp4') || url.includes('.mov') || url.includes('.avi');
                                 return isVideo ? (
-                                    <video key={0} src={url} controls style={{ width: "200px", margin: "10px" }} />
+                                    <video key={0} src={url} controls style={{ width: "300px", margin: "10px" }} />
                                 ) : (
-                                    <img key={0} src={url} alt={`image-0`} style={{ width: "200px", margin: "10px" }} />
+                                    <img key={0} src={url} alt={`image-0`} style={{ width: "300px", margin: "10px" }} />
                                 );
                             })()}
                         </div>
-                        <div style={{
-                            color: "white",
-                            display: "flex",
-                            justifyContent: "space-between",
-                            flexDirection: "column",
-                            padding: "20px",
-                            width:"100%"
-                        }}>
-                            <div style={{display: "flex", gap: "10px", alignItems: "center", justifyContent: "space-between", width:"90%"}}>
-                                <div style={{display: "flex", gap:"20px", alignItems: "center"}}>
-                                    <h1>{doc.title}</h1>
-                                    <p>{doc.users}</p>
-                                </div>
-                                <div style={{display: "flex", gap:"20px"}}>
-                                    {Array.isArray(doc.tags) ?
-                                        doc.tags.map((tag, index) => (
-                                            <span
-                                                className="detail-modal-tags"
-                                                key={index}
-                                                onClick={() => tagSearch(tag)}
-                                                style={{marginRight: '10px', cursor: 'pointer'}}
-                                            >
-                                                {tag}
-                                            </span>
-                                        ))
-                                        : ''}
-                                </div>
+                        <div className="community-content-lists-contents">
+                            <div>
+                                <h1 style={{fontSize:"50px", color:"white", fontWeight:"bolder"}}>{doc.title}</h1>
+                                <p style={{fontSize:"20px", color:"#a1a1a1"}}>{doc.users}</p>
+                            </div>
+                            <div style={{display:"flex", gap:"1rem"}}>
+                            {Array.isArray(doc.tags) ?
+                                    doc.tags.map((tag, index) => (
+                                        <span
+                                            className="detail-modal-tags"
+                                            key={index}
+                                            onClick={() => tagSearch(tag)}
+                                            style={{marginRight: '10px', cursor: 'pointer'}}
+                                        >
+                                        {tag}
+                                    </span>
+                                    ))
+                                    : ''}
                             </div>
                         </div>
                     </div>
@@ -235,22 +231,24 @@ function Community(key, value) {
             )}
             <Header/>
             {tagSearchMode === false && (
-                <div style={{display: "flex", justifyContent: "flex-start", width: "90%", marginTop:"30px"}}>
-                    <div style={{background:"#282828", width:"280px", borderRadius:"5px", height:"44px", display:"flex", flexDirection:"row", alignItems:"center", justifyContent:"center"}}>
+                <div style={{display: "flex", justifyContent: "flex-end", width: "90vw", marginTop:"3.3vh"}}>
+                    <div style={{
+                        display:"flex",
+                        alignItems: "center",
+                        justifyContent: "center"
+                    }}>
                         <input
-                            id="titleSearch"
                             className="tagsearch-input"
                             color="white"
                             value={searchWhat}
                             onChange={(e) => setSearch(e.target.value)}
+                            onKeyDown={handleKeyDown} // Enter 키로 검색 실행
                             placeholder="검색할 태그나 제목을 입력하세요"
                         />
-                        <button onClick={toSearchTags}
-                                className="tagsearch-button"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-search" viewBox="0 0 16 16">
-                                <path d="M11.742 10.342a5.5 5.5 0 1 0-1.397 1.397l3.75 3.75a1 1 0 0 0 1.415-1.415l-3.75-3.75zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-                            </svg>
+                        <button className="community-content-add-btn" onClick={() => {
+                            setModalOpen2(true)
+                        }}>
+                            <p>Add</p>
                         </button>
                     </div>
                 </div>
@@ -258,9 +256,6 @@ function Community(key, value) {
             <div className="community-content-list-container">
                 {writeDocs()}
             </div>
-            <button className="community-content-add-btn" onClick={() => {setModalOpen2(true)}}>
-                <p>+</p>
-            </button>
             <Modal
                 isOpen={modalOpen}
                 onRequestClose={closeModal}
@@ -291,7 +286,7 @@ function Community(key, value) {
                             {window.localStorage.setItem("whoUsers",selectItem.users)}
                             <h2 className="detail-modal-container-head">{selectItem.title}</h2>
                             {selectItem.fileUrls && selectItem.fileUrls.map((url, index) => {
-                                const isVideo = url.includes('.mp4') || url.includes('.mov') || url.includes('.avi'); // 파일 확장자를 기준으로 비디오 여부 확인
+                                const isVideo = url.includes('.mp4') || url.includes('.mov') || url.includes('.avi');
                                 return isVideo ? (
                                     <video key={index} src={url} controls style={{width: "300px", margin: "10px"}}/>
                                 ) : (

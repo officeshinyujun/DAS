@@ -1,18 +1,31 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import Modal from "react-modal";
+import { toNewdb, toNewstorage } from "../data/toNewFirebase";
+import { collection, addDoc, getDocs } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { v4 as uuidv4 } from "uuid";
+import "../design/community.css";
 import Header from "../component/header";
-import { chatdb } from "../data/connectUserFirebase";
 import base64 from "base-64";
-import { collection, setDoc, doc, getDoc, getDocs, addDoc } from "firebase/firestore";
+import { Link } from "react-router-dom";
 
-function Tonew() {
-    const [userConnecter, setUserConnecter] = useState('');
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
-    const [userMessage, setUserMessage] = useState('');
-    const [chats, setChats] = useState([]);
-    const [toUserConnect, setToUserConnect] = useState([]);
+Modal.setAppElement('#root');
 
-    // 토큰 디코딩 함수
+function Community(key, value) {
+    const [fileUploads, setFileUploads] = useState([]);
+    const [title, setTitle] = useState("");
+    const [documents, setDocuments] = useState([]);
+    const [content, setContent] = useState("");
+    const [tagsInput, setTagsInput] = useState("");
+    const fileInputRef = useRef(null);
+    const [searchWhat, setSearch] = useState("");
+    const [ifSearchTags, setIfSearchTags] = useState(false);
+    const [ifSearchTitle, setIfSearchTitle] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectItem, setSelectItem] = useState(null);
+    const [tagSearchMode, setTagSearchMode] = useState(false);
+    const [modalOpen2, setModalOpen2] = useState(false);
+
     const decodeToken = () => {
         const token = localStorage.getItem('authToken');
         if (!token) {
@@ -21,206 +34,290 @@ function Tonew() {
         }
 
         try {
-            const payload = token.split('.')[1];
-            const decoded = base64.decode(payload);
-            return JSON.parse(decoded);
+            const payload = token.substring(token.indexOf('.') + 1, token.lastIndexOf('.'));
+            const decode = base64.decode(payload);
+            return JSON.parse(decode);
         } catch (err) {
             console.error("Error decoding or parsing token:", err);
             return null;
         }
     };
 
-    // 채팅 전송 함수
-    const toChat = async () => {
-        const user = decodeToken();
-        if (!user || !user.name) {
-            setError("Unable to decode user from token.");
-            return;
-        }
+    const toModalOpen = (item) => {
+        setModalOpen(true);
+        setSelectItem(item);
+    };
 
+    const closeModal = () => {
+        setModalOpen(false);
+        setSelectItem(null);
+    };
+
+    const uploadFile = async (fileUrls) => {
         try {
-            const userChatRef = doc(chatdb, 'userChat', user.name);
-            const messagesCollectionRef = collection(userChatRef, 'messages');
-            await addDoc(messagesCollectionRef, {
-                userMessage: userMessage,
-                username: user.name,
-                timestamp: new Date()
+            const tags = tagsInput.split(',').map(tag => tag.trim());
+            const users = decodeToken();
+            const testCollectionRef = collection(toNewdb, `tonew`);
+            await addDoc(testCollectionRef, {
+                title: title,
+                content: content,
+                fileUrls: fileUrls,
+                tags: tags,
+                users: users.name
             });
-            setUserMessage('');
-            setSuccess('Message sent successfully!');
-        } catch (e) {
-            console.error("Error sending message:", e);
-            setError("An error occurred while sending the message.");
+            alert("성공적으로 올라갔습니다!");
+        } catch (error) {
+            console.error("Error writing document: ", error);
         }
     };
 
-    // 연결된 사용자 로드 함수
-    const loadConnectUser = useCallback(async () => {
-        try {
-            const user = decodeToken();
-            if (!user || !user.name) {
-                console.error("Unable to decode user from token.");
-                return;
-            }
-
-            const connectUserRef = collection(chatdb, 'userConnect');
-            const connectuser = await getDocs(connectUserRef);
-            const data = connectuser.docs.map(doc => ({
-                ...doc.data(),
-                id: doc.id
-            }));
-
-            const connectedUser = data.filter(u => u.userConnect === user.name);
-            setToUserConnect(connectedUser);
-        } catch (e) {
-            console.error("Error loading connect users:", e);
-        }
-    }, []);
-
-    // 채팅 로드 함수
-    const loadChats = useCallback(async () => {
-        const user = decodeToken();
-        if (!user || !user.name) {
-            setError("Unable to decode user from token.");
+    const upload = async () => {
+        if (fileUploads.length === 0) {
+            console.error("No files selected");
             return;
         }
 
-        try {
-            const userChatRef = doc(chatdb, 'userChat', user.name);
-            const messagesCollectionRef = collection(userChatRef, 'messages');
-            const userChatLists = await getDocs(messagesCollectionRef);
+        const uploadPromises = fileUploads.map(file => {
+            const fileExtension = file.name.split('.').pop().toLowerCase();
+            const fileType = file.type.startsWith("image/") ? "images" : "videos";
+            const fileRef = ref(toNewstorage, `${fileType}/${uuidv4()}.${fileExtension}`);
+            return uploadBytes(fileRef, file).then(snapshot => {
+                return getDownloadURL(snapshot.ref);
+            });
+        });
 
-            let allChats = userChatLists.docs.map(doc => ({
+        try {
+            const urls = await Promise.all(uploadPromises);
+            await uploadFile(urls);
+        } catch (error) {
+            console.error("Error uploading files: ", error);
+        }
+    };
+
+    useEffect(() => {
+        loadDocs();
+    }, []);
+
+    const loadDocs = async () => {
+        try {
+            const testCollectionRef = collection(toNewdb, "tonew");
+            const lists = await getDocs(testCollectionRef);
+            const data = lists.docs.map(doc => ({
                 ...doc.data(),
                 id: doc.id,
             }));
-
-            if (toUserConnect.length > 0) {
-                const connectedUserChats = await Promise.all(toUserConnect.map(async (connectedUser) => {
-                    const otherUserChatRef = doc(chatdb, 'userChat', connectedUser.username);
-                    const otherMessagesCollectionRef = collection(otherUserChatRef, 'messages');
-                    const otherChatLists = await getDocs(otherMessagesCollectionRef);
-                    return otherChatLists.docs.map(doc => ({
-                        ...doc.data(),
-                        id: doc.id,
-                    }));
-                }));
-
-                allChats = [
-                    ...allChats,
-                    ...connectedUserChats.flat()
-                ];
-            }
-
-            // 타임스탬프를 기준으로 정렬
-            const sortedData = allChats.sort((a, b) => a.timestamp.toDate().getTime() - b.timestamp.toDate().getTime());
-            setChats(sortedData);
-
-        } catch (e) {
-            console.error("Error loading chats:", e);
-            setError("An error occurred while loading chats.");
-        }
-    }, [toUserConnect]);
-
-    // 사용자 연결 함수
-    const toConnect = async () => {
-        setError('');
-        setSuccess('');
-
-        try {
-            const user = decodeToken();
-            if (!user || !user.name) {
-                setError("User not authenticated or username not found. Please login again.");
-                return;
-            }
-
-            if (!userConnecter) {
-                setError("Please enter a user to connect with.");
-                return;
-            }
-
-            const userConnectRef = collection(chatdb, 'userConnect');
-            const userToConnectDoc = await getDoc(doc(userConnectRef, userConnecter));
-            if (!userToConnectDoc.exists()) {
-                setError("User to connect does not exist.");
-                return;
-            }
-
-            await setDoc(doc(userConnectRef, user.name), {
-                username: user.name,
-                userConnect: userConnecter
-            }, { merge: true });
-
-            await setDoc(doc(userConnectRef, userConnecter), {
-                username: userConnecter,
-                userConnect: user.name
-            }, { merge: true });
-
-            setSuccess("Connection established successfully!");
-            setUserConnecter('');
+            setDocuments(data);
+            console.log(data);
+            console.log("잘 불러옴ㅇㅇ");
         } catch (error) {
-            console.error("Error in toConnect:", error);
-            setError("An error occurred while establishing the connection.");
+            console.error("Error loading documents: ", error);
         }
     };
 
-    // 컴포넌트가 마운트될 때 데이터 로드 및 주기적인 채팅 업데이트 설정
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                await loadConnectUser();
-                await loadChats();
-            } catch (error) {
-                console.error("Error in useEffect:", error);
-            }
-        };
+    const handleFileChange = (e) => {
+        setFileUploads([...e.target.files]);
+    };
 
-        fetchData();
+    // Enter 키로 검색 기능 실행
+    const handleKeyDown = (e) => {
+        if (e.key === "Enter") {
+            toSearchTags();
+        }
+    };
 
-        // 주기적인 채팅 데이터 리로드 설정 (5초마다)
-        const intervalId = setInterval(loadChats, 5000); // 5000ms = 5초
+    const toSearchTags = () => {
+        if (searchWhat.includes('#')) {
+            setIfSearchTags(true);
+            setIfSearchTitle(false);
+        } else {
+            setIfSearchTitle(true);
+            setIfSearchTags(false);
+        }
+    };
 
-        // 컴포넌트 언마운트 시 인터벌 클리어
-        return () => clearInterval(intervalId);
-    }, [loadConnectUser, loadChats]); // loadConnectUser와 loadChats 함수가 변경될 때마다 호출
+    const writeDocs = () => {
+        let filteredDocs;
+
+        if (ifSearchTags) {
+            filteredDocs = documents.filter(doc => doc.tags && doc.tags.includes(searchWhat));
+        } else if (ifSearchTitle) {
+            filteredDocs = documents.filter(doc => doc.title && doc.title.includes(searchWhat));
+        } else if (tagSearchMode) {
+            const selectedTag = JSON.parse(localStorage.getItem('selectedTag'));
+            filteredDocs = documents.filter(doc => doc.tags && doc.tags.includes(selectedTag));
+        } else {
+            filteredDocs = documents;
+        }
+
+        return (
+            <>
+                {filteredDocs.map(doc => (
+                    <div className="community-content-lists" key={doc.id} onClick={() => toModalOpen(doc)}>
+                        <div style={{display: "flex", justifyContent: "center", alignItems: "center"}}>
+                            {doc.fileUrls && doc.fileUrls.length > 0 && (() => {
+                                const url = doc.fileUrls[0];
+                                const isVideo = url.includes('.mp4') || url.includes('.mov') || url.includes('.avi');
+                                return isVideo ? (
+                                    <video key={0} src={url} controls style={{ height: "14.5rem", margin: "10px" }} />
+                                ) : (
+                                    <img key={0} src={url} alt={`image-0`} style={{ height: "14.5rem", margin: "10px" }} />
+                                );
+                            })()}
+                        </div>
+                        <div className="community-content-lists-contents">
+                            <div>
+                                <h1 style={{fontSize:"50px", color:"white", fontWeight:"bolder"}}>{doc.title}</h1>
+                                <p style={{fontSize:"20px", color:"#a1a1a1"}}>{doc.users}</p>
+                            </div>
+                            <div style={{display:"flex", gap:"1rem"}}>
+                                {Array.isArray(doc.tags) ?
+                                    doc.tags.map((tag, index) => (
+                                        <span
+                                            className="detail-modal-tags"
+                                            key={index}
+                                            onClick={() => tagSearch(tag)}
+                                            style={{marginRight: '10px', cursor: 'pointer'}}
+                                        >
+                                        {tag}
+                                    </span>
+                                    ))
+                                    : ''}
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </>
+        );
+    };
+
+    const tagSearch = (tag) => {
+        setTagSearchMode(true);
+        console.log(tag);
+        localStorage.setItem('selectedTag', JSON.stringify(tag));
+        setModalOpen(false);
+    };
 
     return (
-        <>
-            <Header />
-            <div>
-                <input
-                    value={userConnecter}
-                    onChange={(e) => setUserConnecter(e.target.value)}
-                    placeholder="Enter user to connect"
-                />
-                <button onClick={toConnect}>Connect</button>
-                {error && <p style={{ color: 'red' }}>{error}</p>}
-                {success && <p style={{ color: 'green' }}>{success}</p>}
-                <input
-                    value={userMessage}
-                    onChange={(e) => setUserMessage(e.target.value)}
-                    placeholder="Enter your message"
-                />
-                <button onClick={toChat}>Send Message</button>
-                <div>
-                    <h2>Chat Messages:</h2>
-                    {chats.map(chat => (
-                        <div key={chat.id}>
-                            <p><strong>{chat.username}</strong>: {chat.userMessage}</p>
-                        </div>
-                    ))}
+        <div className="community-background">
+            {modalOpen2 && (
+                <div className="modal2background">
+                    <div className="modal2-container">
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            multiple
+                            accept="image/*,video/*"
+                            onChange={handleFileChange}
+                            className="modal-container2-file"
+                        />
+                        <input
+                            style={{color: "blue"}}
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                        />
+                        <input
+                            value={content}
+                            onChange={(e) => setContent(e.target.value)}
+                        />
+                        <input
+                            value={tagsInput}
+                            onChange={(e) => setTagsInput(e.target.value)}
+                            placeholder="태그를 쉼표로 구분하여 입력하세요"
+                        />
+                        <button onClick={upload}>Upload</button>
+                        <button onClick={() => {setModalOpen2(false)}}>X</button>
+                    </div>
                 </div>
-                <div>
-                    <h2>Connect Users:</h2>
-                    {toUserConnect.map(user => (
-                        <div key={user.id}>
-                            <p>{user.username}</p>
-                        </div>
-                    ))}
+            )}
+            <Header/>
+            {tagSearchMode === false && (
+                <div style={{display: "flex", justifyContent: "flex-end", width: "90vw", marginTop:"3.3vh"}}>
+                    <div style={{
+                        display:"flex",
+                        alignItems: "center",
+                        justifyContent: "center"
+                    }}>
+                        <input
+                            className="tagsearch-input"
+                            color="white"
+                            value={searchWhat}
+                            onChange={(e) => setSearch(e.target.value)}
+                            onKeyDown={handleKeyDown} // Enter 키로 검색 실행
+                            placeholder="검색할 태그나 제목을 입력하세요"
+                        />
+                        <button className="community-content-add-btn" onClick={() => {
+                            setModalOpen2(true)
+                        }}>
+                            <p>Add</p>
+                        </button>
+                    </div>
                 </div>
+            )}
+            <div className="community-content-list-container">
+                {writeDocs()}
             </div>
-        </>
+            <Modal
+                isOpen={modalOpen}
+                onRequestClose={closeModal}
+                style={{
+                    content: {
+                        top: '50%',
+                        left: '50%',
+                        right: 'auto',
+                        bottom: 'auto',
+                        marginRight: '-50%',
+                        transform: 'translate(-50%, -50%)',
+                        backgroundColor:"#131620",
+                        border:"1px solid #282828",
+                        width: '90%',
+                        height: '90%',
+                        padding:"30px"
+                    },
+                    overlay: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.75)'
+                    }
+                }}
+                contentLabel="Selected Document"
+            >
+                {selectItem && (
+                    <div className="detail-modal-container">
+                        <div>
+                            <Link to="/userProfile"><p>{selectItem.users}</p></Link>
+                            {window.localStorage.setItem("whoUsers",selectItem.users)}
+                            <h2 className="detail-modal-container-head">{selectItem.title}</h2>
+                            {selectItem.fileUrls && selectItem.fileUrls.map((url, index) => {
+                                const isVideo = url.includes('.mp4') || url.includes('.mov') || url.includes('.avi');
+                                return isVideo ? (
+                                    <video key={index} src={url} controls style={{width: "300px", margin: "10px"}}/>
+                                ) : (
+                                    <img key={index} src={url} alt={`image-${index}`}
+                                         style={{width: "300px", margin: "10px"}}/>
+                                );
+                            })}
+                            <div>{selectItem.content}</div>
+                        </div>
+                        <div style={{display: "flex", justifyContent: "center", alignItems: "center", flexDirection:"column", gap:"20px"}}>
+                            <div className="detail-modal-tags-list">
+                                {Array.isArray(selectItem.tags) ?
+                                    selectItem.tags.map((tag, index) => (
+                                        <span
+                                            className="detail-modal-tags"
+                                            key={index}
+                                            onClick={() => tagSearch(tag)}
+                                            style={{marginRight: '10px', cursor: 'pointer'}}
+                                        >
+                                        {tag}
+                                    </span>
+                                    ))
+                                    : ''}
+                            </div>
+                            <button className="detail-modal-close" onClick={closeModal}>X</button>
+                        </div>
+                    </div>
+                )}
+            </Modal>
+        </div>
     );
 }
 
-export default Tonew;
+export default Community;

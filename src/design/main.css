@@ -12,7 +12,7 @@
     background-image: url("../design/background.png");
     background-size: cover;
     background-repeat: no-repeat;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
 }
 .tomodalopen {
@@ -71,6 +71,12 @@
     justify-content: center;
     flex-direction: column;
     align-items: center;
+    width: 70vw;
+    box-sizing: border-box;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 .main-content2{
     display: flex;
@@ -80,12 +86,14 @@
     gap: 20px;
     width: 70vw;
     box-sizing: border-box;
+    max-height: 700px;
 }
 .main-content2-list{
     display: flex;
     gap: 20px;
     flex-wrap: wrap;
     justify-content: center;
+    width: 100%;
 }
 .main-content2-tonew{
     width: 500px;
@@ -118,7 +126,6 @@
 .main-content2-modal{
     width: 100%;
     height: 200px;
-    border: 1px solid red;
 }
 .gradiant-circle1{
     width: 1080px;
@@ -129,4 +136,48 @@
     top: 60vh;
     background: radial-gradient(rgba(121, 97 , 168, 93%), rgba(61,49,84,55%), rgba(0,0,0,0));
 
+}
+.main-content2-list > div {
+    transition: all 0.3s ease;
+    overflow: hidden;
+    cursor: pointer;
+    /* 기존 스타일 유지 (예: width, height, margin, background-color 등) */
+}
+
+.main-content2-list > div.expanded {
+    width: 100% !important;
+    height: 50vh !important;
+    overflow-y: auto;
+}
+
+.main-content2-list > div h3 {
+    margin: 0;
+    padding: 10px;
+}
+
+.main-content2-list > div .box-content {
+    display: none;
+    padding: 10px;
+}
+
+.main-content2-list > div.expanded .box-content {
+    display: block;
+}
+.main-content-head{
+    width: 80vw;
+    height: 100px;
+    color: white;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    gap: 7rem;
+}
+.main-content-head > a{
+    text-decoration: none;
+    color: white;
+    transition-property: font-size;
+    transition-duration: 0.3s;
+}
+.main-content-head > a:hover{
+    font-size : 23px;
 }

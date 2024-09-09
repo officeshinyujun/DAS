@@ -1,23 +1,20 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import { getAuth } from "firebase/auth";
 import NavigateLeft from "../component/navigateleftbar";
 import { motion, AnimatePresence } from "framer-motion";
 import "../design/main.css";
 import image from "../design/DAT 로고 1.png";
 import app from "../data/firebase";
+import Header from "../component/header";
 
 function Main() {
     const [modal, setModal] = useState(false);
-    const [modal2, setModal2] = useState(false);
     const auth = getAuth(app);
-    const [profileId, setProfileId] = useState(null);
     const navigate = useNavigate();
-    const [profile, setProfile] = useState(null);
-    const [selectuser, setSelectuser] = useState(null);
+    const [expandedBox, setExpandedBox] = useState(null);
 
     useEffect(() => {
-        // 로그인 상태 확인 및 유저 설정
         const unsubscribe = auth.onAuthStateChanged((currentUser) => {
             if (!currentUser) {
                 navigate('/login');
@@ -34,23 +31,72 @@ function Main() {
         setModal(false);
     };
 
+    const handleBoxClick = (boxName) => {
+        // Check if the box being clicked is already expanded
+        if (expandedBox === boxName) {
+            // If yes, collapse it and reset the container height
+            setExpandedBox(null);
+            document.getElementsByClassName("main-container")[0].style.height = "100vh";
+        } else {
+            // If no, expand the clicked box and set the container height to 140vh
+            setExpandedBox(boxName);
+            document.getElementsByClassName("main-container")[0].style.height = "140vh";
+        }
+    };
+
+
     return (
         <div className="main-container">
+            <Header/>
             <div className="main-content">
-                <div className="main-title">
-                    <img src={image} style={{width: "40px", height: "40px"}}/>
-                    <p>DAT</p>
-                </div>
                 <div className="main-content2">
                     <div className="main-content2-list">
-                        <div className="main-content2-tonew" onClick={() => {
-                            document.getElementsByClassName("main-content2-tonew")[0].style.width = "600px";
-                        }}></div>
-                        <div className="main-content2-opener"></div>
+                        <div
+                            className={`main-content2-tonew ${expandedBox === 'tonew' ? 'expanded' : ''}`}
+                            onClick={() => handleBoxClick('tonew')}
+                        >
+                            <h3>To New</h3>
+                            <div className="box-content">
+                                <p>To New 확장된 내용이 여기에 들어갑니다.</p>
+                                <p>스크롤이 생길만큼 내용을 추가하세요.</p>
+                                {/* 필요한 만큼 내용 추가 */}
+                            </div>
+                        </div>
+                        <div
+                            className={`main-content2-opener ${expandedBox === 'opener' ? 'expanded' : ''}`}
+                            onClick={() => handleBoxClick('opener')}
+                        >
+                            <h3>Opener</h3>
+                            <div className="box-content">
+                                <p>Opener 확장된 내용이 여기에 들어갑니다.</p>
+                                <p>스크롤이 생길만큼 내용을 추가하세요.</p>
+                                {/* 필요한 만큼 내용 추가 */}
+                            </div>
+                        </div>
                     </div>
                     <div className="main-content2-list">
-                        <div className="main-content2-community"></div>
-                        <div className="main-content2-profile"></div>
+                        <div
+                            className={`main-content2-community ${expandedBox === 'community' ? 'expanded' : ''}`}
+                            onClick={() => handleBoxClick('community')}
+                        >
+                            <h3>Community</h3>
+                            <div className="box-content">
+                                <p>Community 확장된 내용이 여기에 들어갑니다.</p>
+                                <p>스크롤이 생길만큼 내용을 추가하세요.</p>
+                                {/* 필요한 만큼 내용 추가 */}
+                            </div>
+                        </div>
+                        <div
+                            className={`main-content2-profile ${expandedBox === 'profile' ? 'expanded' : ''}`}
+                            onClick={() => handleBoxClick('profile')}
+                        >
+                            <h3>Profile</h3>
+                            <div className="box-content">
+                                <p>Profile 확장된 내용이 여기에 들어갑니다.</p>
+                                <p>스크롤이 생길만큼 내용을 추가하세요.</p>
+                                {/* 필요한 만큼 내용 추가 */}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

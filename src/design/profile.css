@@ -1,23 +1,33 @@
 .profile-container{
     position: relative;
-    gap: 30px;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: #131620;
-    padding: 20px;
-
+    background-image: url("../design/background.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+}
+.profile-content-all{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 150px);
 }
 .profile-content{
-    width: 400px;
-    height: 90%;
-    border-radius: 7px;
-    border:1px solid #3C3C3C;
-    box-sizing: border-box;
+    width: 25vw;
+    height: 80vh;
+    border-radius: 7px;box-sizing: border-box;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+    background: #171A29;
 }
 .profile-content2{
-    width: calc(90% - 400px);
+    width: calc(90% - 25vw);
     border-radius: 7px;
     display: flex;
     flex-direction: column;
@@ -25,35 +35,65 @@
     justify-content: center;
     gap: 30px;
     padding: 30px;
-
 }
 .profile-content-main{
-    background-color: #171A29;
     color: white;
     gap: 20px;
     width: 100%;
-    height: calc(95vh - 200px);
     display: flex;
     justify-content: center;
-    flex-direction: column;align-items: center;
+    flex-direction: row;
+    align-items: center;
+    margin-top: 3vh;
+}
+.profile-content-main-username{
+    font-weight: bold;
+    font-size: 45px;
+    background: linear-gradient(to right, #FFFFFF, #7F5FFF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+
 }
 .profile-content-main-2{
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: #131620;
-    width: 90%;
-    border :1px solid #000;
+    width: 20vw;
     border-radius: 10px;
+    background: #131620;
+    color: white;
 }
-.profile-content-main-standing-detail>p:nth-child(1){
-    color: #888888;
+.profile-content-main-standing-detail-ranks>p:nth-child(1){
+    color: rgba(127, 95, 255, 0.4);
     font-size: 10px;
+    font-weight: bolder;
 }
-.profile-content-main-standing-detail>p:nth-child(2){
-    color: #7961A8;
+.profile-content-main-standing-detail-ranks>p:nth-child(2){
+    color: rgba(127, 95, 255, 0.7);
     font-size: 20px;
+    font-weight: bolder;
+}
+.profile-content-main-standing-detail-40l>p:nth-child(1){
+    color: #fff;
+    font-size: 10px;
+    font-weight: bolder;
+}
+.profile-content-main-standing-detail-40l>p:nth-child(2){
+    color: #ff9f5f;
+    font-size: 20px;
+    font-weight: bolder;
+}
+.profile-content-main-standing-detail-blitz>p:nth-child(1){
+    color: #fff;
+    font-size: 10px;
+    font-weight: bolder;
+}
+.profile-content-main-standing-detail-blitz>p:nth-child(2){
+    color: #ff5f5f;
+    font-size: 20px;
+    font-weight: bolder;
+
 }
 .profile-content-main-standing{
     padding: 5px;
@@ -61,7 +101,14 @@
     flex-direction: row;
     justify-content: center;
     gap: 10px;
-    border: 1px solid #000;
+    border-radius: 10px;
+}
+.profile-content-main-standing-ranks{
+    padding: 5px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 30px;
     border-radius: 10px;
 }
 .profile-content-main-badges{
@@ -70,7 +117,7 @@
     flex-direction: row;
     gap: 10px;
     justify-content: flex-start;
-    margin-bottom: 10px;
+    align-items: center;
 }
 .profile-content-main-3{
     display: flex;
@@ -78,11 +125,11 @@
     justify-content: center;
     align-items: start;
     background-color: #131620;
-    width: 90%;
+    width: 20vw;
     box-sizing: border-box;
     padding: 10px 20px;
-    border :1px solid #000;
     border-radius: 10px;
+    color: #a1a1a1;
 }
 .profile-content-main-4{
     display: flex;
@@ -90,10 +137,9 @@
     justify-content: center;
     align-items: center;
     background-color: #131620;
-    width: 90%;
+    width: 20vw;
     box-sizing: border-box;
     padding: 10px 20px;
-    border :1px solid #000;
     border-radius: 10px ;
 }
 .profile-content-main-4-gamecon{
@@ -102,19 +148,29 @@
     justify-content: center;
     flex-direction: column;
     align-items: center;
+    color: white;
+}
+.profile-content-main-4-p{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #a1a1a1;
+    gap: 10px;
+    font-size: 15px;
 }
 
 .profile-content2-40lines{
+    border-radius: 10px;
     width: 90%;
-    height: 300px;
-    border: 1px solid #000;
+    height: 17vh;
     color: white;
     padding: 0;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: start;
     position: relative;
     transition: transform 0.3s ease, width 0.3s ease, height 0.3s ease;
+    background: #171A29;
 }
 .profile-content2-40lines:hover{
     transform: scale(1.05);
@@ -123,10 +179,12 @@
     transform: scale(1.05);
 }
 .profile-content2-zen{
+
     width: 90%;
-    height: 200px;
-    border:1px solid #000;
+    height: 17vh;
     color: white;
+    background: #171a29;
+    border-radius: 10px;
     padding: 0;
     display: flex;
     flex-direction: column;
@@ -136,16 +194,16 @@
 }
 .profile-content2-40lines-head{
     display: flex;
-    width: 250px;
+    width: 300px;
     position: sticky;
     gap: 10px;
     align-items: center;
 }
 .profile-content2-40lines-box{
-    background-image: url("../design/Rectangle 50.png");
+    background-image: url("../design/40lrectangle.png");
     display: flex;
     align-items: center;
-    width: 160px;
+    width: 200px;
     height: 40px;
     background-position: center;
     background-size: cover;
@@ -153,10 +211,10 @@
     padding-left: 20px;
 }
 .profile-content2-blitz-box{
-    background-image: url("../design/rectangle blitz.png");
+    background-image: url("../design/blzbox.png");
     display: flex;
     align-items: center;
-    width: 160px;
+    width: 250px;
     height: 40px;
     background-position: center;
     background-size: cover;
@@ -164,10 +222,10 @@
     padding-left: 20px;
 }
 .profile-content2-zen-box{
-    background-image: url("../design/rectangle zen.png");
+        background-image: url("../design/zenbox.png");
     display: flex;
     align-items: center;
-    width: 160px;
+    width: 200px;
     height: 40px;
     background-position: center;
     background-size: cover;
@@ -175,7 +233,7 @@
     padding-left: 20px;
 }
 .profile-content2-quick-box{
-    background-image: url("../design/asdasdasdf.png");
+    background-image: url("../design/quickplaybox.png");
     display: flex;
     align-items: center;
     width: 380px;
@@ -187,11 +245,12 @@
 }
 .profile-content2-40lines-records{
     width: 100%;
-    padding: 15px;
+    padding: 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     box-sizing: border-box;
+    height: calc(17vh - 40px);
 }
 .profile-content2-40lines-standing{
     width: 150px;
@@ -202,18 +261,16 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    background-color: #131620;
     box-sizing: border-box;
     height: 100px;
     width:  100%;
     padding: 20px;
     z-index: 10;
-    border:1px solid red;
 }
 .profile-content-banner{
     width: 100%;
-    height: 300px;
-    background-image: url("https://t4.ftcdn.net/jpg/04/42/21/53/360_F_442215355_AjiR6ogucq3vPzjFAAEfwbPXYGqYVAap.jpg");
+    height: 25vh;
+
     background-position: center;
     background-size: cover;
     align-items: center;
@@ -229,10 +286,26 @@
     border-top: #717171;
     height: 60px;
     color: #717171;
-}
+}ㅇ
 .profile-content2-quick-head{
     width: 600px;
     display: flex;
     align-items: center;
-
+}
+.profile-content-more{
+    width: 5rem;
+    height: 2rem;
+    border: 1px solid #4C3999;
+    background: #131620;
+    color: white;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition-property: height, width, background-color, font-size;
+    transition-duration: 0.3s;
+}
+.profile-content-more:hover{
+    width: 5.5rem;
+    height: 2.5rem;
+    background: linear-gradient(#7F5FFF, #4C3999);
+    font-size:1.7rem ;
 }

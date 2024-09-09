@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import image from "../data/Group 3.png";
 import React, { useState } from "react";
 import { addDoc, collection, getDocs, query, where, setDoc, doc } from "firebase/firestore";
-import { chatdb, chatapp } from "../data/connectUserFirebase";
+import {openerdb} from "../data/openerFirebase";
 import base64 from "base-64";
 
 function RegisterPage() {
@@ -23,7 +23,7 @@ function RegisterPage() {
     const onSubmit = async (data) => {
         try {
             // Check if username already exists
-            const userConnectRef = collection(chatdb, 'userConnect');
+            const userConnectRef = collection(openerdb, 'userConnect');
             const q = query(userConnectRef, where("username", "==", data.name));
             const querySnapshot = await getDocs(q);
             if (!querySnapshot.empty) {

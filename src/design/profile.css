@@ -155,6 +155,8 @@
     align-items: center;
     justify-content: center;
     color: #a1a1a1;
+    gap: 10px;
+    font-size: 15px;
 }
 
 .profile-content2-40lines{
@@ -269,7 +271,6 @@
     width: 100%;
     height: 25vh;
 
-    background-image: url("https://t4.ftcdn.net/jpg/04/42/21/53/360_F_442215355_AjiR6ogucq3vPzjFAAEfwbPXYGqYVAap.jpg");
     background-position: center;
     background-size: cover;
     align-items: center;

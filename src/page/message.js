@@ -2,7 +2,9 @@ import React, { useEffect, useState, useCallback } from "react";
 import Header from "../component/header";
 import { openerdb } from "../data/openerFirebase";
 import base64 from "base-64";
-import { collection, setDoc, doc, getDoc, addDoc,getDocs, onSnapshot, query, where } from "firebase/firestore";
+import { collection, setDoc, doc, getDoc, addDoc, getDocs, onSnapshot } from "firebase/firestore";
+import "../design/message.css";
+import { Link } from "react-router-dom";
 
 function Tonew() {
     const [userConnecter, setUserConnecter] = useState('');
@@ -13,7 +15,6 @@ function Tonew() {
     const [toUserConnect, setToUserConnect] = useState([]);
     const [selectedUser, setSelectedUser] = useState(null); // Tracks the selected user for chatting
 
-    // Decode token function
     const decodeToken = () => {
         const token = localStorage.getItem('authToken');
         if (!token) {
@@ -31,7 +32,6 @@ function Tonew() {
         }
     };
 
-    // Send a message to the currently selected user
     const toChat = async () => {
         const user = decodeToken();
         if (!user || !user.name) {
@@ -45,7 +45,6 @@ function Tonew() {
         }
 
         try {
-            // Use a unique chat room for each user pair (a-b, a-c, etc.)
             const chatRoomId = [user.name, selectedUser.username].sort().join('_');
             const userChatRef = doc(openerdb, 'chats', chatRoomId);
             const messagesCollectionRef = collection(userChatRef, 'messages');
@@ -63,7 +62,6 @@ function Tonew() {
         }
     };
 
-    // Load the connected users
     const loadConnectUser = async () => {
         try {
             const user = decodeToken();
@@ -83,10 +81,10 @@ function Tonew() {
             setToUserConnect(connectedUser);
         } catch (e) {
             console.error("Error loading connect users:", e);
+            setError("An error occurred while loading connected users.");
         }
     };
 
-    // Load chats for the selected user
     const loadChats = useCallback(async () => {
         const user = decodeToken();
         if (!user || !user.name) {
@@ -100,19 +98,16 @@ function Tonew() {
         }
 
         try {
-            // Use the chat room ID unique to the user pair
             const chatRoomId = [user.name, selectedUser.username].sort().join('_');
             const selectedUserChatRef = doc(openerdb, 'chats', chatRoomId);
             const messagesCollectionRef = collection(selectedUserChatRef, 'messages');
 
-            // Listener for the selected user's messages
             onSnapshot(messagesCollectionRef, (snapshot) => {
                 const allChats = snapshot.docs.map(doc => ({
                     ...doc.data(),
                     id: doc.id,
                 }));
 
-                // Sort by timestamp
                 const sortedData = allChats.sort((a, b) => a.timestamp.toDate().getTime() - b.timestamp.toDate().getTime());
                 setChats(sortedData);
             });
@@ -138,7 +133,6 @@ function Tonew() {
                 return;
             }
 
-            // 올바르게 컬렉션과 문서 참조
             const userConnectRef = collection(openerdb, 'userConnect');
             const userToConnectDoc = await getDoc(doc(openerdb, 'userConnect', userConnecter));
 
@@ -167,20 +161,35 @@ function Tonew() {
         }
     };
 
-
     // Load chats and connected users on component mount
     useEffect(() => {
         loadConnectUser();
-    }, []);
+    }, [loadConnectUser]);
 
     // Load chats when the selected user changes
     useEffect(() => {
         loadChats();
     }, [selectedUser, loadChats]);
 
+    // Function to determine if the message is from the current user or not
+    const getChatClass = (username) => {
+        const currentUser = decodeToken()?.name;
+        return username === currentUser ? 'me' : 'others';
+    };
+
     return (
-        <>
+        <div className="message-container">
             <Header />
+            <div className="message-content-users">
+                {toUserConnect.map(user => (
+                    <div key={user.id} style={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "column" }}>
+                        <div onClick={() => setSelectedUser(user)} className="message-content-users-profile">
+                            {/* Add content here for user profile display */}
+                        </div>
+                        <h3 style={{ color: "white" }}>{user.username}</h3>
+                    </div>
+                ))}
+            </div>
             <div>
                 <input
                     value={userConnecter}
@@ -188,32 +197,33 @@ function Tonew() {
                     placeholder="Enter user to connect"
                 />
                 <button onClick={toConnect}>Connect</button>
-                {error && <p style={{ color: 'red' }}>{error}</p>}
-                {success && <p style={{ color: 'green' }}>{success}</p>}
-                <input
-                    value={userMessage}
-                    onChange={(e) => setUserMessage(e.target.value)}
-                    placeholder="Enter your message"
-                />
-                <button onClick={toChat}>Send Message</button>
-                <div>
-                    <h2>Chat Messages with {selectedUser ? selectedUser.username : "..."}</h2>
-                    {chats.map(chat => (
-                        <div key={chat.id}>
-                            <p><strong>{chat.username}</strong>: {chat.userMessage}</p>
-                        </div>
-                    ))}
-                </div>
-                <div>
-                    <h2>Connected Users:</h2>
-                    {toUserConnect.map(user => (
-                        <div key={user.id} onClick={() => setSelectedUser(user)}>
-                            <p>{user.username}</p>
-                        </div>
-                    ))}
+                <div className="message-content-chatList">
+                    <h2>{selectedUser ? selectedUser.username : "Select a user"}</h2>
+                    <div className="message-content-chatList2">
+                        {chats.map(chat => (
+                            <div key={chat.id} className={getChatClass(chat.username)}>
+                                {/* Conditionally render username */}
+                                {getChatClass(chat.username) === 'others' && (
+                                    <div className="others-profile">
+                                        <Link to="/userProfile" onClick={() => window.localStorage.setItem("whoUsers", chat.username)}>
+                                        </Link>
+                                    </div>
+                                )}
+                                <p className={`${getChatClass(chat.username)}-box`}>{chat.userMessage}</p>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="message-content-chat-input">
+                        <input
+                            value={userMessage}
+                            onChange={(e) => setUserMessage(e.target.value)}
+                            placeholder="Send message"
+                        />
+                        <button onClick={toChat}>Send</button>
+                    </div>
                 </div>
             </div>
-        </>
+        </div>
     );
 }
 

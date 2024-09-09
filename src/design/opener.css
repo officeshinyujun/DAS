@@ -82,3 +82,9 @@
     border-radius: 4px;
     background: #131620;
 }
+.modal-content img {
+    max-width: 90%;
+    height: auto; /* 이미지 비율을 유지하기 위해 높이 자동 */
+    display: block; /* 이미지가 중앙에 정렬되지 않도록 블록 요소로 설정 */
+    margin: 0 auto; /* 이미지를 중앙에 배치 */
+}

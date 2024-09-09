@@ -20,36 +20,15 @@ function Profile() {
 
     const list = [1, 2, 3, 4, 5];
     const imageList = [
-        "http://127.0.0.1:8000/user-content/res/badges/allclear.png",
-        "http://127.0.0.1:8000/user-content/res/badges/100player.png",
-        "http://127.0.0.1:8000/user-content/res/badges/leaderboard1.png",
-        "http://127.0.0.1:8000/user-content/res/badges/secretgrade.png",
-        "http://127.0.0.1:8000/user-content/res/badges/twc23_t8.png"
+        "http://127.0.0.1:8000/user-content/res,badges,allclear.png",
+        "http://127.0.0.1:8000/user-content/res,badges,100player.png",
+        "http://127.0.0.1:8000/user-content/res,badges,leaderboard1.png",
+        "http://127.0.0.1:8000/user-content/res,badges,secretgrade.png",
+        "http://127.0.0.1:8000/user-content/res,badges,twc23_t8.png"
     ];
 
-    const decodeToken = () => {
-        const token = localStorage.getItem('authToken');
-        if (!token) {
-            console.error("Token not found in localStorage.");
-            return null;
-        }
-
-        try {
-            const payload = token.substring(token.indexOf('.') + 1, token.lastIndexOf('.'));
-            const decode = base64.decode(payload);
-            return JSON.parse(decode);
-        } catch (err) {
-            console.error("Error decoding or parsing token:", err);
-            return null;
-        }
-    };
-
     useEffect(() => {
-        const decodedData = decodeToken();
-        if (decodedData) {
-            setUserDecodeName(decodedData);
-            loadData(decodedData);
-        }
+        loadData(localStorage.getItem('whoUsers'));
         testasync()
     }, []);
 
@@ -74,7 +53,7 @@ function Profile() {
         setIsLoading(true);
 
         try {
-            const userResponse = await fetch(`http://127.0.0.1:8000/users/${decodedData.name}`);
+            const userResponse = await fetch(`http://127.0.0.1:8000/api/users,${decodedData}`);
             if (!userResponse.ok) {
                 throw new Error("Failed to fetch user data.");
             }
@@ -82,7 +61,7 @@ function Profile() {
             console.log(userData)
             setUserProfileData(userData);
 
-            const recordResponse = await fetch(`http://127.0.0.1:8000/users/${decodedData.name}/summaries`);
+            const recordResponse = await fetch(`http://127.0.0.1:8000/api/users,${decodedData},summaries`);
             if (!recordResponse.ok) {
                 throw new Error("Failed to fetch record data.");
             }
@@ -109,17 +88,34 @@ function Profile() {
 
     const testasync = async() => {
         try {
-            const userImageResponse = await fetch("http://127.0.0.1:8000/user-content/res/badges/allclear.png");
+            // 프로필 이미지 가져오기
+            const userImageResponse = await fetch(`http://127.0.0.1:8000/user-content/user-content,avatars,${userProfileData.data._id}.jpg?rv=${userProfileData.data.avatar_revision}`);
             if (!userImageResponse.ok) {
-                throw new Error('Failed to fetch image');
+                throw new Error('Failed to fetch profile image');
             }
             const imageUrl = userImageResponse.url;
             setProfileImage(imageUrl);
-            console.log(profileImage)
+
         } catch (error) {
-            console.log(error);
+            console.error(error);
+            // 기본 이미지 설정
+            setProfileImage("https://i.ibb.co/5L43xB2/profiletest.png");
         }
-    }
+
+        try {
+            // 배너 이미지 가져오기
+            const userBannerResponce = await fetch(`http://127.0.0.1:8000/user-content/user-content,banners,${userProfileData.data._id}.jpg?rv=${userProfileData.data.banner_revision}`);
+            if (!userBannerResponce.ok) {
+                throw new Error('Failed to fetch banner image');
+            }
+            const bannerUrl = userBannerResponce.url;
+            setBannerimage(bannerUrl);
+
+        } catch (error) {
+            console.error(error);
+            setBannerimage("https://i.ibb.co/1Yc9m1h/bgbgbgbgbgb.png");
+        }
+    };
 
     const handleBoxClick = (t) => {
         if (expandedBox === true) {
@@ -147,9 +143,11 @@ function Profile() {
                     <div className="profile-content-all">
                         <div className="profile-content">
                             <div className="profile-content-banner"
+                                 style={{backgroundImage:`url(${bannerImage})`}}
                             >
                                 <img src={profileImage} style={{
                                     width: '250px',
+                                    borderRadius:"10px",
                                     height: '250px',
                                     objectFit: 'cover',
                                     top: "12vh"
@@ -181,7 +179,7 @@ function Profile() {
                                             display: "flex",
                                             gap: "10px",
                                             fontSize: "30px"
-                                        }}>RANK :<img src={"https://tetrio.team2xh.net/images/ranks/sp.png"}
+                                        }}>RANK :<img src={`http://127.0.0.1:8000/user-content/res,league-ranks,${userReacordData.data.league.rank}.png`}
                                             //https://tetr.io/res/league-ranks/a.png <-여기서 이미지 얻어올수 잇음
                                                       style={{height: "30px"}}/></p>
                                         <div className="profile-content-main-standing-ranks">
@@ -252,11 +250,11 @@ function Profile() {
                                             width: "100%"
                                         }}>
                                             <div className="profile-content-main-4-p">
-                                                <p>apm : {userProfileData.data.apm}</p>
-                                                <p>glicko : {userProfileData.data.glicko}</p>
-                                                <p>pps : {userProfileData.data.pps}</p>
-                                                <p>rd : {userProfileData.data.rd}</p>
-                                                <p>vs : {userProfileData.data.vs}</p>
+                                                <p>apm : {userReacordData.data.league.apm}</p>
+                                                <p>glicko : {(userReacordData.data.league.glicko).toFixed(2)}</p>
+                                                <p>pps : {userReacordData.data.league.pps}</p>
+                                                <p>rd : {(userReacordData.data.league.rd).toFixed(2)}</p>
+                                                <p>vs : {userReacordData.data.league.vs}</p>
                                             </div>
                                         </div>
                                     </div>

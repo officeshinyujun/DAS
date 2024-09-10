@@ -11,7 +11,7 @@ import { Link } from "react-router-dom";
 
 Modal.setAppElement('#root');
 
-function Community(key, value) {
+function Community() {
     const [fileUploads, setFileUploads] = useState([]);
     const [title, setTitle] = useState("");
     const [documents, setDocuments] = useState([]);
@@ -202,30 +202,68 @@ function Community(key, value) {
             {modalOpen2 && (
                 <div className="modal2background">
                     <div className="modal2-container">
+                        <div style={{display: "flex", justifyContent: "space-between", alignItems: "center", width:"90%"}}>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                multiple
+                                accept="image/*,video/*"
+                                onChange={handleFileChange}
+                            />
+                            <button onClick={() => {
+                                setModalOpen2(false)
+                            }}
+                            style={{border:"none", background:"none", fontSize:"20px", color:"white"}}
+                            >X
+                            </button>
+                        </div>
                         <input
-                            ref={fileInputRef}
-                            type="file"
-                            multiple
-                            accept="image/*,video/*"
-                            onChange={handleFileChange}
-                            className="modal-container2-file"
-                        />
-                        <input
-                            style={{color: "blue"}}
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
+                            placeholder="제목을 입력하세요"
+                            className="title-input"
                         />
                         <input
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
+                            placeholder="본문을 입력하세요"
                         />
-                        <input
-                            value={tagsInput}
-                            onChange={(e) => setTagsInput(e.target.value)}
-                            placeholder="태그를 쉼표로 구분하여 입력하세요"
-                        />
-                        <button onClick={upload}>Upload</button>
-                        <button onClick={() => {setModalOpen2(false)}}>X</button>
+                        <div style={
+                            {
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems:"center",
+                                gap:"0.4rem",
+                                width:"90%",
+                                boxSizing:"border-box",
+                            }
+                        }>
+                            <input
+                                value={tagsInput}
+                                onChange={(e) => setTagsInput(e.target.value)}
+                                placeholder="태그를 쉼표로 구분하여 입력하세요"
+                                style={{
+                                    width:"90%",
+                                    height:"1.7rem",
+                                    background:"#131620",
+                                    border:"none",
+                                    borderRadius:"5px",
+                                    color:"white",
+                                    padding:"0 0.5rem"
+                                }}
+                            />
+                            <button onClick={upload} style={{
+                                width:"10%",
+                                height:"2rem",
+                                borderRadius:"5px",
+                                border:"1px solid #4c3999",
+                                color:"#4c3999",
+                                fontWeight:"bolder",
+                                background:"#131620"
+                            }}>Upload</button>
+                        </div>
+
+
                     </div>
                 </div>
             )}
@@ -268,10 +306,11 @@ function Community(key, value) {
                         marginRight: '-50%',
                         transform: 'translate(-50%, -50%)',
                         backgroundColor:"#131620",
-                        border:"1px solid #282828",
-                        width: '90%',
-                        height: '90%',
-                        padding:"30px"
+                        border:"none",
+                        width: '55vw',
+                        height: '50vh',
+                        padding:"30px",
+                        color:"white"
                     },
                     overlay: {
                         backgroundColor: 'rgba(0, 0, 0, 0.75)'
@@ -282,9 +321,16 @@ function Community(key, value) {
                 {selectItem && (
                     <div className="detail-modal-container">
                         <div>
-                            <Link to="/userProfile"><p>{selectItem.users}</p></Link>
-                            {window.localStorage.setItem("whoUsers",selectItem.users)}
-                            <h2 className="detail-modal-container-head">{selectItem.title}</h2>
+                            <div style={{
+                                display: "flex",
+                                justifyContent: "start",
+                                alignItems:"center",
+                                gap : "0.4rem",
+                            }}>
+                                <h2 className="detail-modal-container-head">{selectItem.title}</h2>
+                                <Link to="/userProfile" style={{textDecoration:"none", color:"white"}}><p>{selectItem.users}</p></Link>
+                                {window.localStorage.setItem("whoUsers",selectItem.users)}
+                            </div>
                             {selectItem.fileUrls && selectItem.fileUrls.map((url, index) => {
                                 const isVideo = url.includes('.mp4') || url.includes('.mov') || url.includes('.avi');
                                 return isVideo ? (

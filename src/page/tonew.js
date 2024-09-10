@@ -1,30 +1,38 @@
-import React, { useEffect, useRef, useState } from "react";
-import Modal from "react-modal";
-import { toNewdb, toNewstorage } from "../data/toNewFirebase";
-import { collection, addDoc, getDocs } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { v4 as uuidv4 } from "uuid";
-import "../design/community.css";
+import React, { useEffect, useState } from "react";
+import { collection, setDoc, doc, getDocs } from "firebase/firestore";
+import { toNewdb } from "../data/toNewFirebase";
 import Header from "../component/header";
 import base64 from "base-64";
-import { Link } from "react-router-dom";
+import { v4 as uuidv4 } from "uuid";
+import "../design/tonew.css";
 
-Modal.setAppElement('#root');
+const fetchUserData = async (id) => {
+    const response = await fetch(`http://127.0.0.1:8000/api/users/${id}`);
+    if (!response.ok) throw new Error("Failed to fetch user data.");
+    return response.json();
+};
 
-function Community(key, value) {
-    const [fileUploads, setFileUploads] = useState([]);
-    const [title, setTitle] = useState("");
-    const [documents, setDocuments] = useState([]);
-    const [content, setContent] = useState("");
-    const [tagsInput, setTagsInput] = useState("");
-    const fileInputRef = useRef(null);
-    const [searchWhat, setSearch] = useState("");
-    const [ifSearchTags, setIfSearchTags] = useState(false);
-    const [ifSearchTitle, setIfSearchTitle] = useState(false);
+const fetchUserContent = async (id, type) => {
+    const response = await fetch(`http://127.0.0.1:8000/user-content/${type}/${id}.jpg`);
+    if (!response.ok) throw new Error(`Failed to fetch ${type} image.`);
+    return URL.createObjectURL(await response.blob());
+};
+
+function ToNew() {
+    const [userProfileData, setUserProfileData] = useState(null);
+    const [userFlag, setUserFlag] = useState('');
+    const [bannerImage, setBannerImage] = useState('');
+    const [profileImage, setProfileImage] = useState('');
+    const [userRecordData, setUserRecordData] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [dataLoaded, setDataLoaded] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
-    const [selectItem, setSelectItem] = useState(null);
-    const [tagSearchMode, setTagSearchMode] = useState(false);
-    const [modalOpen2, setModalOpen2] = useState(false);
+    const [contentTags, setContentTags] = useState('');
+    const [content, setContent] = useState('');
+    const [contentList, setContentList] = useState([]);
+    const [filteredContent, setFilteredContent] = useState([]);
+    const [selectedTag, setSelectedTag] = useState('');
+    const [error, setError] = useState(null);
 
     const decodeToken = () => {
         const token = localStorage.getItem('authToken');
@@ -32,292 +40,197 @@ function Community(key, value) {
             console.error("Token not found in localStorage.");
             return null;
         }
-
         try {
-            const payload = token.substring(token.indexOf('.') + 1, token.lastIndexOf('.'));
-            const decode = base64.decode(payload);
-            return JSON.parse(decode);
+            const payload = token.split('.')[1];
+            const decoded = base64.decode(payload);
+            return JSON.parse(decoded);
         } catch (err) {
             console.error("Error decoding or parsing token:", err);
             return null;
         }
     };
 
-    const toModalOpen = (item) => {
-        setModalOpen(true);
-        setSelectItem(item);
-    };
+    const loadData = async (id) => {
+        if (!id) return;
 
-    const closeModal = () => {
-        setModalOpen(false);
-        setSelectItem(null);
-    };
+        setIsLoading(true);
 
-    const uploadFile = async (fileUrls) => {
         try {
-            const tags = tagsInput.split(',').map(tag => tag.trim());
-            const users = decodeToken();
-            const testCollectionRef = collection(toNewdb, `tonew`);
-            await addDoc(testCollectionRef, {
-                title: title,
-                content: content,
-                fileUrls: fileUrls,
-                tags: tags,
-                users: users.name
-            });
-            alert("성공적으로 올라갔습니다!");
-        } catch (error) {
-            console.error("Error writing document: ", error);
+            const userData = await fetchUserData(id);
+            setUserProfileData(userData);
+
+            const recordResponse = await fetch(`http://127.0.0.1:8000/api/users/${id}/summaries`);
+            if (!recordResponse.ok) throw new Error("Failed to fetch record data.");
+            const recordData = await recordResponse.json();
+            setUserRecordData(recordData);
+
+            if (userData?.data?.country) {
+                const flagResponse = await fetch(`https://restcountries.com/v3.1/alpha/${userData.data.country}`);
+                if (!flagResponse.ok) throw new Error("Failed to fetch flag data.");
+                const flagData = await flagResponse.json();
+                const flag = flagData[0]?.flags?.svg;
+                setUserFlag(flag);
+            }
+
+            const [profileUrl, bannerUrl] = await Promise.all([
+                fetchUserContent(userData.data._id, 'avatars'),
+                fetchUserContent(userData.data._id, 'banners')
+            ]);
+            setProfileImage(profileUrl);
+            setBannerImage(bannerUrl);
+
+        } catch (err) {
+            console.error("Error fetching data:", err);
+            setError("Failed to load user data.");
+        } finally {
+            setIsLoading(false);
+            setDataLoaded(true);
         }
     };
 
     const upload = async () => {
-        if (fileUploads.length === 0) {
-            console.error("No files selected");
+        const token = decodeToken();
+        if (!token) return;
+
+        console.log('User Profile Data before upload:', userProfileData);
+        console.log('User Record Data before upload:', userRecordData);
+
+        if (!userProfileData || !userRecordData) {
+            console.error("User data not loaded yet");
+            setError("User data not loaded. Please try again.");
             return;
         }
 
-        const uploadPromises = fileUploads.map(file => {
-            const fileExtension = file.name.split('.').pop().toLowerCase();
-            const fileType = file.type.startsWith("image/") ? "images" : "videos";
-            const fileRef = ref(toNewstorage, `${fileType}/${uuidv4()}.${fileExtension}`);
-            return uploadBytes(fileRef, file).then(snapshot => {
-                return getDownloadURL(snapshot.ref);
-            });
-        });
-
         try {
-            const urls = await Promise.all(uploadPromises);
-            await uploadFile(urls);
+            const docRef = doc(collection(toNewdb, 'toNewintroduce'), uuidv4());
+
+            await setDoc(docRef, {
+                title: token.name,
+                content: content,
+                tags: contentTags.split(',').map(tag => tag.trim())
+            });
+
+            console.log('Document successfully written!');
+            loadContentData();
         } catch (error) {
-            console.error("Error uploading files: ", error);
+            console.error("Error adding document:", error);
+            setError("Failed to upload content: " + error.message);
+        }
+    };
+
+    const loadContentData = async () => {
+        try {
+            const querySnapshot = await getDocs(collection(toNewdb, 'toNewintroduce'));
+            const contentData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            console.log("Fetched content data:", contentData);
+            setContentList(contentData);
+            setFilteredContent(contentData);
+        } catch (error) {
+            console.error("Error loading documents:", error);
+            setError("Failed to load content data.");
         }
     };
 
     useEffect(() => {
-        loadDocs();
+        const tokenData = decodeToken();
+        if (tokenData) {
+            loadData(tokenData.id); // Make sure to use the correct token property here
+        }
     }, []);
 
-    const loadDocs = async () => {
-        try {
-            const testCollectionRef = collection(toNewdb, "tonew");
-            const lists = await getDocs(testCollectionRef);
-            const data = lists.docs.map(doc => ({
-                ...doc.data(),
-                id: doc.id,
-            }));
-            setDocuments(data);
-            console.log(data);
-            console.log("잘 불러옴ㅇㅇ");
-        } catch (error) {
-            console.error("Error loading documents: ", error);
+    useEffect(() => {
+        loadContentData();
+    }, []);
+
+    const openModal = () => {
+        if (!modalOpen) setModalOpen(true);
+    };
+
+    const closeModal = () => {
+        if (modalOpen) setModalOpen(false);
+    };
+
+    const formatTags = (tags) => {
+        if (typeof tags === 'string') {
+            return tags.split(',').map((tag, index) => (
+                <span
+                    key={index}
+                    className="tag"
+                    onClick={() => handleTagClick(tag.trim())}
+                >
+                    {tag.trim()}
+                </span>
+            ));
         }
-    };
-
-    const handleFileChange = (e) => {
-        setFileUploads([...e.target.files]);
-    };
-
-    // Enter 키로 검색 기능 실행
-    const handleKeyDown = (e) => {
-        if (e.key === "Enter") {
-            toSearchTags();
+        if (Array.isArray(tags)) {
+            return tags.map((tag, index) => (
+                <span
+                    key={index}
+                    className="tag"
+                    onClick={() => handleTagClick(tag)}
+                >
+                    {tag}
+                </span>
+            ));
         }
+        return null;
     };
 
-    const toSearchTags = () => {
-        if (searchWhat.includes('#')) {
-            setIfSearchTags(true);
-            setIfSearchTitle(false);
+    const handleTagClick = (tag) => {
+        setSelectedTag(tag);
+        if (tag) {
+            const filtered = contentList.filter(item => item.tags.includes(tag));
+            setFilteredContent(filtered);
         } else {
-            setIfSearchTitle(true);
-            setIfSearchTags(false);
+            setFilteredContent(contentList);
         }
     };
 
-    const writeDocs = () => {
-        let filteredDocs;
-
-        if (ifSearchTags) {
-            filteredDocs = documents.filter(doc => doc.tags && doc.tags.includes(searchWhat));
-        } else if (ifSearchTitle) {
-            filteredDocs = documents.filter(doc => doc.title && doc.title.includes(searchWhat));
-        } else if (tagSearchMode) {
-            const selectedTag = JSON.parse(localStorage.getItem('selectedTag'));
-            filteredDocs = documents.filter(doc => doc.tags && doc.tags.includes(selectedTag));
-        } else {
-            filteredDocs = documents;
-        }
-
-        return (
-            <>
-                {filteredDocs.map(doc => (
-                    <div className="community-content-lists" key={doc.id} onClick={() => toModalOpen(doc)}>
-                        <div style={{display: "flex", justifyContent: "center", alignItems: "center"}}>
-                            {doc.fileUrls && doc.fileUrls.length > 0 && (() => {
-                                const url = doc.fileUrls[0];
-                                const isVideo = url.includes('.mp4') || url.includes('.mov') || url.includes('.avi');
-                                return isVideo ? (
-                                    <video key={0} src={url} controls style={{ height: "14.5rem", margin: "10px" }} />
-                                ) : (
-                                    <img key={0} src={url} alt={`image-0`} style={{ height: "14.5rem", margin: "10px" }} />
-                                );
-                            })()}
-                        </div>
-                        <div className="community-content-lists-contents">
-                            <div>
-                                <h1 style={{fontSize:"50px", color:"white", fontWeight:"bolder"}}>{doc.title}</h1>
-                                <p style={{fontSize:"20px", color:"#a1a1a1"}}>{doc.users}</p>
-                            </div>
-                            <div style={{display:"flex", gap:"1rem"}}>
-                                {Array.isArray(doc.tags) ?
-                                    doc.tags.map((tag, index) => (
-                                        <span
-                                            className="detail-modal-tags"
-                                            key={index}
-                                            onClick={() => tagSearch(tag)}
-                                            style={{marginRight: '10px', cursor: 'pointer'}}
-                                        >
-                                        {tag}
-                                    </span>
-                                    ))
-                                    : ''}
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </>
-        );
-    };
-
-    const tagSearch = (tag) => {
-        setTagSearchMode(true);
-        console.log(tag);
-        localStorage.setItem('selectedTag', JSON.stringify(tag));
-        setModalOpen(false);
+    const handleShowAll = () => {
+        setSelectedTag('');
+        setFilteredContent(contentList);
     };
 
     return (
-        <div className="community-background">
-            {modalOpen2 && (
-                <div className="modal2background">
-                    <div className="modal2-container">
+        <div className="tonew-container">
+            <Header />
+            <button onClick={openModal} style={{ zIndex: "99" }}>Open Modal</button>
+            <button onClick={handleShowAll} className="tonew-Showall">Show All</button>
+            {isLoading && <div className="loading-spinner">Loading...</div>}
+            {error && <div className="error-message">{error}</div>}
+            <div className="content-list">
+                {filteredContent.map((item) => (
+                    <div key={item.id} className="content-item">
+                        <h2>{item.title}</h2>
+                        <p>{item.content}</p>
+                        <div className="tags">
+                            {formatTags(item.tags)}
+                        </div>
+                    </div>
+                ))}
+            </div>
+            {modalOpen && (
+                <div className="tonew-modal-container">
+                    <div className="tonew-modal-content">
                         <input
-                            ref={fileInputRef}
-                            type="file"
-                            multiple
-                            accept="image/*,video/*"
-                            onChange={handleFileChange}
-                            className="modal-container2-file"
-                        />
-                        <input
-                            style={{color: "blue"}}
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                        />
-                        <input
+                            type="text"
+                            placeholder="Content"
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
                         />
                         <input
-                            value={tagsInput}
-                            onChange={(e) => setTagsInput(e.target.value)}
-                            placeholder="태그를 쉼표로 구분하여 입력하세요"
+                            type="text"
+                            placeholder="Tags"
+                            value={contentTags}
+                            onChange={(e) => setContentTags(e.target.value)}
                         />
                         <button onClick={upload}>Upload</button>
-                        <button onClick={() => {setModalOpen2(false)}}>X</button>
+                        <button onClick={closeModal}>Close</button>
                     </div>
                 </div>
             )}
-            <Header/>
-            {tagSearchMode === false && (
-                <div style={{display: "flex", justifyContent: "flex-end", width: "90vw", marginTop:"3.3vh"}}>
-                    <div style={{
-                        display:"flex",
-                        alignItems: "center",
-                        justifyContent: "center"
-                    }}>
-                        <input
-                            className="tagsearch-input"
-                            color="white"
-                            value={searchWhat}
-                            onChange={(e) => setSearch(e.target.value)}
-                            onKeyDown={handleKeyDown} // Enter 키로 검색 실행
-                            placeholder="검색할 태그나 제목을 입력하세요"
-                        />
-                        <button className="community-content-add-btn" onClick={() => {
-                            setModalOpen2(true)
-                        }}>
-                            <p>Add</p>
-                        </button>
-                    </div>
-                </div>
-            )}
-            <div className="community-content-list-container">
-                {writeDocs()}
-            </div>
-            <Modal
-                isOpen={modalOpen}
-                onRequestClose={closeModal}
-                style={{
-                    content: {
-                        top: '50%',
-                        left: '50%',
-                        right: 'auto',
-                        bottom: 'auto',
-                        marginRight: '-50%',
-                        transform: 'translate(-50%, -50%)',
-                        backgroundColor:"#131620",
-                        border:"1px solid #282828",
-                        width: '90%',
-                        height: '90%',
-                        padding:"30px"
-                    },
-                    overlay: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.75)'
-                    }
-                }}
-                contentLabel="Selected Document"
-            >
-                {selectItem && (
-                    <div className="detail-modal-container">
-                        <div>
-                            <Link to="/userProfile"><p>{selectItem.users}</p></Link>
-                            {window.localStorage.setItem("whoUsers",selectItem.users)}
-                            <h2 className="detail-modal-container-head">{selectItem.title}</h2>
-                            {selectItem.fileUrls && selectItem.fileUrls.map((url, index) => {
-                                const isVideo = url.includes('.mp4') || url.includes('.mov') || url.includes('.avi');
-                                return isVideo ? (
-                                    <video key={index} src={url} controls style={{width: "300px", margin: "10px"}}/>
-                                ) : (
-                                    <img key={index} src={url} alt={`image-${index}`}
-                                         style={{width: "300px", margin: "10px"}}/>
-                                );
-                            })}
-                            <div>{selectItem.content}</div>
-                        </div>
-                        <div style={{display: "flex", justifyContent: "center", alignItems: "center", flexDirection:"column", gap:"20px"}}>
-                            <div className="detail-modal-tags-list">
-                                {Array.isArray(selectItem.tags) ?
-                                    selectItem.tags.map((tag, index) => (
-                                        <span
-                                            className="detail-modal-tags"
-                                            key={index}
-                                            onClick={() => tagSearch(tag)}
-                                            style={{marginRight: '10px', cursor: 'pointer'}}
-                                        >
-                                        {tag}
-                                    </span>
-                                    ))
-                                    : ''}
-                            </div>
-                            <button className="detail-modal-close" onClick={closeModal}>X</button>
-                        </div>
-                    </div>
-                )}
-            </Modal>
         </div>
     );
 }
 
-export default Community;
+export default ToNew;

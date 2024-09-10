@@ -7,28 +7,34 @@
     justify-content: center;
     gap: 6vw;
     color: white;
+    z-index: 99;
 }
 .header-container> a{
     text-decoration: none;
     color: white;
     transition-property: font-size;
     transition-duration: 0.3s;
+    z-index: 99;
 }
 .header-container>div:nth-child(1){
     display: flex;
     align-items: center;
     gap: 20px;
+    z-index: 99;
 }
 .header-container>div:nth-child(1)>a{
     color:white;
     text-decoration: none;
     transition-property: font-size;
     transition-duration: 0.3s;
+    z-index: 99;
 }
 .header-container>div:nth-child(1)>a:hover{
     font-size : 23px;
+    z-index: 99;
 
 }
 .header-container > a:hover{
     font-size : 23px;
+    z-index: 99;
 }

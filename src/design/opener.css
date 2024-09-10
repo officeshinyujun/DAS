@@ -88,3 +88,57 @@
     display: block; /* 이미지가 중앙에 정렬되지 않도록 블록 요소로 설정 */
     margin: 0 auto; /* 이미지를 중앙에 배치 */
 }
+.opener-content-modal-input{
+    height: 1.7rem;
+    border-radius: 5px;
+    border: none;
+    background: #131620;
+    padding: 0 0.5rem;
+    color: white;
+    font-weight: bolder;
+}
+.ql-toolbar.ql-snow, .ql-container.ql-snow{
+    border: none;
+}
+.ql-container.ql-snow{
+    background-color: #131620;
+}
+.opener-content-modal-tags-input{
+    height: 2.3rem;
+    border-radius: 5px;
+    border: none;
+    background: #131620;
+    padding: 0 0.5rem;
+    color: white;
+    font-weight: bolder;
+    width: 45vw;
+    box-sizing: border-box;
+
+}
+.opener-content-modal-upload{
+    width: 4vw;
+    height: 2.3rem;
+    border: #7F5FFF 1px solid;
+    background: none;
+    border-radius: 5px;
+    color:#7F5FFF;
+    font-weight: bold;
+}
+.opener-content-modal-interaction{
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-content: center;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    gap: 1rem;
+}
+.opener-content-modal-close{
+    border:none;
+    color: white;
+    background: none;
+    font-size: 1rem;
+}
+.modal-content-imgset img{
+    max-width: 20vw;
+}

@@ -25,7 +25,8 @@
     color: white;
     font-weight: bolder;
     padding: 3px;
-    box-shadow: 0 0 0 0p    x #4C3999;
+    /* box-shadow: 0 0 0 0px #4C3999; */
+    border: none;
     outline: none;
 }
 
@@ -33,7 +34,7 @@
     color: white;
     padding: 3px;
     outline: none;
-    box-shadow: 0 0 0 2px #4C3999;
+    box-shadow: none;
 }
 
 

@@ -217,16 +217,16 @@ function Opener() {
     return (
         <div className="opener-container">
             <Header />
-            <div className="opener-content-searchandadd">
-                <input
-                    type="text"
-                    placeholder="   Search posts"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <button onClick={() => setIsModalOpen(true)}>Add</button>
-            </div>
             <div className="opener-content-postlist">
+                <div className="opener-content-searchandadd">
+                    <input
+                        type="text"
+                        placeholder="Search posts"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                    <button onClick={() => setIsModalOpen(true)}  className="addButton">Add</button>
+                </div>
                 {filteredPosts.map(post => (
                     <div key={post.id}
                          className="opener-content-posts"

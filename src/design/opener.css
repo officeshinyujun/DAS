@@ -10,41 +10,58 @@
 }
 .opener-content-searchandadd{
     display: flex;
-    gap: 20px;
+    gap: 10px;
     align-items: center;
     margin-top: 3.3vh;
-    width: 90vw;
+    width: 100%;
     justify-content: flex-end;
 }
+
 .opener-content-searchandadd>input{
     width: 35vw;
     height: 3.2vh;
     background: none;
-    border: 1px solid transparent;
-    border-image: linear-gradient(to right, #7F5FFF, #4C3999);
-    border-radius: 7px;
-    border-image-slice: 1;
+    border-radius: 10px;
     color: white;
     font-weight: bolder;
+    padding: 3px;
+    box-shadow: 0 0 0 0p    x #4C3999;
+    outline: none;
 }
+
+.opener-content-searchandadd>input:focus{
+    color: white;
+    padding: 3px;
+    outline: none;
+    box-shadow: 0 0 0 2px #4C3999;
+}
+
+
+.opener-content-searchandadd>input::placeholder{
+    padding: 3px;
+}
+
 .opener-content-searchandadd>button{
-    height: 3.2vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 3px;
+    height: 4vh;
     background: linear-gradient(#7F5FFF, #4C3999);
-    width: 4vw;
+    width: 5vw;
     border: none;
     border-radius: 2px;
     color: white;
-    font-size: 1rem;
+    font-size: 0.8rem;
 }
 .opener-content-postlist{
-    width: 80vw;
+    width: 65vw;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     margin-bottom: 5rem;
-    gap: 2.5rem;
-    margin-top: 2rem;
+    gap: 30px;
 }
 .opener-content-posts{
     width: 100%;
@@ -141,4 +158,8 @@
 }
 .modal-content-imgset img{
     max-width: 20vw;
+}
+
+.addButton {
+    background-color: red;
 }

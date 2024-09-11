@@ -68,19 +68,8 @@ function RegisterPage() {
 
     return (
         <div className="login-background">
-            <div className="main-header-container">
-                <img src={image} style={{width: '80px', height: '80px', marginTop: "20px", marginLeft: "20px"}}
-                     alt="Logo"/>
-                <h1 style={{color: "white", fontSize: "80px", marginLeft: "20px", marginTop: "15px"}}>ARR</h1>
-            </div>
             <div className="login-content-container">
-                <h1 style={{
-                    color: "white",
-                    fontSize: "60px",
-                    fontWeight: "bolder",
-                    marginBottom: "40px",
-                    marginTop: "40px"
-                }}>Join</h1>
+            <h1 style={{color: "white", fontSize: "50px"}}>DAT</h1>
                 <div className="login-container">
                     {error && <p style={{color: 'red'}}>{error}</p>}
                     <form onSubmit={handleSubmit(onSubmit)}>
@@ -92,10 +81,10 @@ function RegisterPage() {
                                     required: true,
                                     minLength: 2,
                                 })}
+                                placeholder="ID"
                             />
                             {errors.name && errors.name.type === 'required' && <p>Name is required!</p>}
                             {errors.name && errors.name.type === 'minLength' && <p>Name must be at least 2 characters long!</p>}
-                            <div>ID</div>
                         </div>
                         <div>
                             <input
@@ -105,10 +94,10 @@ function RegisterPage() {
                                     required: true,
                                     pattern: /^\S+@\S+$/i
                                 })}
+                                placeholder="Email"
                             />
                             {errors.email && errors.email.type === 'required' && <p>Email is required!</p>}
                             {errors.email && errors.email.type === 'pattern' && <p>Invalid email format!</p>}
-                            <div>Email</div>
                         </div>
                         <div>
                             <input
@@ -119,11 +108,11 @@ function RegisterPage() {
                                     minLength: 6,
                                     maxLength: 20,
                                 })}
+                                placeholder="Password"
                             />
                             {errors.password && errors.password.type === 'required' && <p>Password is required!</p>}
                             {errors.password && errors.password.type === 'minLength' && <p>Password must be at least 6 characters long!</p>}
                             {errors.password && errors.password.type === 'maxLength' && <p>Password must be no more than 20 characters long!</p>}
-                            <div>Password</div>
                         </div>
                         <button type="submit" value="Register">Join</button>
                     </form>

@@ -288,7 +288,7 @@ function Opener() {
                             >
                                 #{tag}
                             </div>
-                        ))}
+                        ))} 
                     </div>
                     <div style={{ textAlign: 'center'}}>
                         <button onClick={closeModal} style={{border:"none", background:"none" , color:"white" , fontSize:"1rem"}}>X</button>

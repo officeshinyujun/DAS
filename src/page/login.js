@@ -34,33 +34,23 @@ function LoginPage() {
 
     return (
         <div className="login-background">
-            <div className="main-header-container">
-                <img src={image} style={{width: '80px', height: '80px', marginTop: "20px", marginLeft: "20px"}}
-                     alt="Logo"/>
-                <h1 style={{color: "white", fontSize: "80px", marginLeft: "20px", marginTop: "15px"}}>ARR</h1>
-            </div>
-            <div className="login-content-container">
-                <h1 style={{color: "white",fontSize:"60px", fontWeight:"bolder", marginBottom:"40px", marginTop:"40px" }}>Login</h1>
                 <div className="login-container">
+                <h1 style={{color: "white", fontSize: "50px", marginBottom: "20px"}}>DAT</h1>
                     <form onSubmit={onSubmit}>
                         <div>
-                            <input value={email} onChange={emailChange} type="email" id="_email" required/>
-                            <div>Email</div>
+                            <input value={email} onChange={emailChange} type="email" id="_email" required placeholder='이메일'/>
                         </div>
                         <div>
-                            <input value={password} onChange={passwordChange} type="password" id="_password" required/>
-                            <div>password</div>
+                            <input value={password} onChange={passwordChange} type="password" id="_password" required placeholder='비밀번호'/>
                         </div>
                         <button type="submit">Login</button>
                     </form>
                     <div>
-                        <span>no account? ></span>
+                        <span>no account? > </span>
                         <Link to="/Register" style={{textDecoration:"none", color:"white"}}>Join</Link>
                     </div>
                 </div>
             </div>
-
-        </div>
     );
 }
 

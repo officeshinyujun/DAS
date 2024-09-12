@@ -63,5 +63,21 @@
     background: #171a29;
     border-radius: 10px;
     box-sizing: border-box; /* Ensure padding and border are included in width */
-    margin-right: 20px; /* Optional: Add space between items */
+    margin-right: 20px;
+    gap: 1rem/* Optional: Add space between items */
+}
+.tonew-profile-content-2{
+    width: 80%;
+    height: 7vh;
+    background: #131620;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+}
+.profile-content-main-standing-detail-ranks{
+    color: #4C3999;
+}
+.tags{
+    color: #4C3999;
 }

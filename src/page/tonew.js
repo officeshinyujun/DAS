@@ -5,6 +5,7 @@ import Header from "../component/header";
 import base64 from "base-64";
 import { v4 as uuidv4 } from "uuid";
 import "../design/tonew.css";
+import {openerdb} from "../data/openerFirebase";
 
 function ToNew() {
     const [userProfileData, setUserProfileData] = useState(null);
@@ -219,10 +220,46 @@ function ToNew() {
         setFilteredContent(contentList);
     };
 
+    const toConnect = async (userConnecter) => {
+        setError('');
+
+        try {
+            const user = decodeToken();
+            if (!user || !user.name) {
+                setError("User not authenticated or username not found. Please login again.");
+                return;
+            }
+
+            const userConnectRef = collection(openerdb, 'userConnect');
+            const userToConnectDoc = await getDoc(doc(openerdb, 'userConnect', userConnecter));
+
+            if (!userToConnectDoc.exists()) {
+                setError("User to connect does not exist.");
+                return;
+            }
+
+            await setDoc(doc(openerdb, 'userConnect', user.name), {
+                username: user.name,
+                userConnect: userConnecter,
+                userAccept: true
+            }, { merge: true });
+
+            await setDoc(doc(openerdb, 'userConnect', userConnecter), {
+                username: userConnecter,
+                userConnect: user.name,
+                userAccept: false
+            }, { merge: true });
+
+        } catch (error) {
+            console.error("Error in toConnect:", error);
+            setError("An error occurred while establishing the connection.");
+        }
+    };
+
     return (
         <div className="tonew-container">
             <Header/>
-            <button onClick={openModal} style={{zIndex: "99"}}>Open Modal</button>
+            <button onClick={openModal} style={{zIndex: "99", border:"none", backgroundColor:"#7F5FFF", padding:"0.5rem", color:"white", borderRadius:"5px"}}>Add</button>
             <button onClick={handleShowAll} className="tonew-Showall">Show All</button>
             {isLoading && <div className="loading-spinner">Loading...</div>}
             {error && <div className="error-message">{error}</div>}
@@ -236,8 +273,12 @@ function ToNew() {
                     return (
                         <div key={item.id} className="content-item">
                             <div className="profile-content-banner"
-                                 style={{backgroundImage:"url(https://i.ibb.co/1Yc9m1h/bgbgbgbgbgb.png)" , boxSizing: "border-box", height: "17vh"}}>
-                                <img  style={{
+                                 style={{
+                                     backgroundImage: "url(https://i.ibb.co/1Yc9m1h/bgbgbgbgbgb.png)",
+                                     boxSizing: "border-box",
+                                     height: "17vh"
+                                 }}>
+                                <img style={{
                                     width: '7vh',
                                     borderRadius: "10px",
                                     height: '7vh',
@@ -272,14 +313,14 @@ function ToNew() {
                                 <p style={{fontSize: "16px"}}>time : {Math.floor(profileData.gametime)}</p>
                             </div>
                             <div className="profile-content-main-3">
-                                <p style={{color:"white", fontSize:"1.4rem"}}>{item.content}</p>
+                                <p style={{color: "white", fontSize: "1.4rem"}}>{item.content}</p>
                             </div>
                             <div className="profile-content-main-4" style={{fontSize: "16px", padding: "0.6rem"}}>
                                 <div className="tags">
                                     {formatTags(item.tags)}
                                 </div>
                             </div>
-
+                            <button onClick={() => {toConnect(item.title)}} style={{border:"none", backgroundColor:"#7F5FFF", padding:"0.5rem", borderRadius:"5px", color:"white", fontWeight:"bolder"}}>Chat</button>
                         </div>
                     );
                 })}

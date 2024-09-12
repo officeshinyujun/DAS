@@ -25,16 +25,16 @@
 .header-container>div:nth-child(1)>a{
     color:white;
     text-decoration: none;
-    transition-property: font-size;
-    transition-duration: 0.3s;
+    transition-property: color;
+    transition-duration: 0.5s;
     z-index: 99;
 }
 .header-container>div:nth-child(1)>a:hover{
-    font-size : 23px;
+    color: #4C3999;
     z-index: 99;
 
 }
 .header-container > a:hover{
-    font-size : 23px;
+    color: #4C3999;
     z-index: 99;
 }
